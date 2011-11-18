@@ -33,12 +33,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.w3c.dom.Element;
 
-public class CGSubscription {
+public class Subscription {
 	
 	protected String id;
 	protected String gatewayToken;
@@ -101,7 +99,7 @@ public class CGSubscription {
 		return invoices;
 	}
 
-	public CGSubscription(Element elem){
+	public Subscription(Element elem){
 		this.id = elem.getAttribute("id");
 		this.gatewayToken = XmlUtils.getNamedElemValue(elem, "gatewayToken");
 		this.ccFirstName = XmlUtils.getNamedElemValue(elem, "ccFirstName");
@@ -109,9 +107,9 @@ public class CGSubscription {
 		this.ccType = XmlUtils.getNamedElemValue(elem, "ccType");
 		this.ccLastFour = XmlUtils.getNamedElemValue(elem, "ccLastFour");
 
-		this.ccExpirationDate = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "ccExpirationDate"));
-		this.canceledDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "canceledDatetime"));
-		this.createdDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
+		this.ccExpirationDate = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "ccExpirationDate"));
+		this.canceledDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "canceledDatetime"));
+		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
 		
 		
 		Element plansParent = XmlUtils.getFirstChildByTagName(elem, "plans");

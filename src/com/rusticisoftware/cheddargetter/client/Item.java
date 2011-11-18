@@ -28,26 +28,20 @@
 
 package com.rusticisoftware.cheddargetter.client;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
 import org.w3c.dom.Element;
 
-public class CGCustomer implements Serializable {
+public class Item {
 	protected String id;
 	protected String code;
-	protected String firstName;
-	protected String lastName;
-	protected String company;
-	protected String email;
-	protected String gatewayToken;
+	protected String name;
+	protected int quantity;
+	protected int quantityIncluded;
+	protected boolean isPeriodic;
+	protected float overageAmount;
 	protected Date createdDatetime;
 	protected Date modifiedDatetime;
-	protected List<CGSubscription> subscriptions = new ArrayList<CGSubscription>();
 	
 	public String getId() {
 		return id;
@@ -57,24 +51,24 @@ public class CGCustomer implements Serializable {
 		return code;
 	}
 
-	public String getFirstName() {
-		return firstName;
+	public String getName() {
+		return name;
 	}
 
-	public String getLastName() {
-		return lastName;
+	public int getQuantity() {
+		return quantity;
 	}
 
-	public String getCompany() {
-		return company;
+	public int getQuantityIncluded() {
+		return quantityIncluded;
 	}
 
-	public String getEmail() {
-		return email;
+	public boolean isPeriodic() {
+		return isPeriodic;
 	}
 
-	public String getGatewayToken() {
-		return gatewayToken;
+	public float getOverageAmount() {
+		return overageAmount;
 	}
 
 	public Date getCreatedDatetime() {
@@ -85,35 +79,15 @@ public class CGCustomer implements Serializable {
 		return modifiedDatetime;
 	}
 
-	public List<CGSubscription> getSubscriptions() {
-		return subscriptions;
-	}
-
-	public CGCustomer(Element elem){
+	public Item(Element elem){
 		this.id = elem.getAttribute("id");
 		this.code = elem.getAttribute("code");
-		this.firstName = XmlUtils.getNamedElemValue(elem, "firstName");
-		this.lastName = XmlUtils.getNamedElemValue(elem, "lastName");
-		this.company = XmlUtils.getNamedElemValue(elem, "company");
-		this.email = XmlUtils.getNamedElemValue(elem, "email");
-		this.gatewayToken = XmlUtils.getNamedElemValue(elem, "gatewayToken");
-		this.createdDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-		this.modifiedDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "modifiedDatetime"));
-		
-		Element subsParent = XmlUtils.getFirstChildByTagName(elem, "subscriptions");
-		if(subsParent != null){
-			List<Element> subsList = XmlUtils.getChildrenByTagName(subsParent, "subscription");
-			for(Element sub : subsList){
-				this.subscriptions.add(new CGSubscription(sub));
-			}
-			
-			//Sort subscriptions by create date (most recent first)
-			Collections.sort(this.subscriptions, 
-				new Comparator<CGSubscription>() {
-					public int compare(CGSubscription sub1, CGSubscription sub2) {
-						return sub2.getCreatedDatetime().compareTo(sub1.getCreatedDatetime());
-					}
-				});
-		}
+		this.name = XmlUtils.getNamedElemValue(elem, "name");
+		this.quantity = (Integer)XmlUtils.getNamedElemValue(elem, "quantity", Integer.class, 0);
+		this.quantityIncluded = (Integer)XmlUtils.getNamedElemValue(elem, "quantityIncluded", Integer.class, 0);
+		this.isPeriodic = (Boolean)XmlUtils.getNamedElemValue(elem, "isPeriodic", Boolean.class, false);
+		this.overageAmount = (Float)XmlUtils.getNamedElemValue(elem, "overageAmount", Float.class, 0.0f);
+		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
+		this.modifiedDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "modifiedDatetime"));
 	}
 }

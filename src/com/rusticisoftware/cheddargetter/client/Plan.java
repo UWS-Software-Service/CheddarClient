@@ -34,7 +34,7 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
-public class CGPlan {
+public class Plan {
 	protected String code;
 	protected String id;
 	protected String name;
@@ -50,7 +50,7 @@ public class CGPlan {
 	protected String recurringChargeCode;
 	protected float recurringChargeAmount;
 	protected Date createdDatetime;
-	protected List<CGItem> items = new ArrayList<CGItem>();
+	protected List<Item> items = new ArrayList<Item>();
 
 	public String getCode() {
 		return code;
@@ -112,11 +112,11 @@ public class CGPlan {
 		return createdDatetime;
 	}
 
-	public List<CGItem> getItems() {
+	public List<Item> getItems() {
 		return items;
 	}
 
-	public CGPlan(Element elem){
+	public Plan(Element elem){
 		this.code = elem.getAttribute("code");
 		this.id = elem.getAttribute("id");
 		this.name = XmlUtils.getNamedElemValue(elem, "name");
@@ -131,14 +131,14 @@ public class CGPlan {
 		this.setupChargeAmount = (Float)XmlUtils.getNamedElemValue(elem, "setupChargeAmount", Float.class, 0.0f);
 		this.recurringChargeCode = XmlUtils.getNamedElemValue(elem, "recurringChargeCode");
 		this.recurringChargeAmount = (Float)XmlUtils.getNamedElemValue(elem, "recurringChargeAmount", Float.class, 0.0f);
-		this.createdDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
+		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
 		
 		Element itemsParent = XmlUtils.getFirstChildByTagName(elem, "items");
 		if(itemsParent != null){
-			this.items = new ArrayList<CGItem>();
+			this.items = new ArrayList<Item>();
 			List<Element> itemList = XmlUtils.getChildrenByTagName(itemsParent, "item");
 			for(Element item : itemList){
-				this.items.add(new CGItem(item));
+				this.items.add(new Item(item));
 			}
 		}
 	}

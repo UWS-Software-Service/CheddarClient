@@ -28,66 +28,79 @@
 
 package com.rusticisoftware.cheddargetter.client;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.w3c.dom.Element;
 
-public class CGItem {
+public class Invoice implements Serializable {
 	protected String id;
-	protected String code;
-	protected String name;
-	protected int quantity;
-	protected int quantityIncluded;
-	protected boolean isPeriodic;
-	protected float overageAmount;
+	protected String number;
+	protected String type;
+	protected Date billingDatetime;
 	protected Date createdDatetime;
-	protected Date modifiedDatetime;
+	protected List<Transaction> transactions = new ArrayList<Transaction>();
+	protected List<Charge> charges = new ArrayList<Charge>();
 	
 	public String getId() {
 		return id;
 	}
 
-	public String getCode() {
-		return code;
+	public String getNumber() {
+		return number;
 	}
 
-	public String getName() {
-		return name;
+	public String getType() {
+		return type;
 	}
 
-	public int getQuantity() {
-		return quantity;
-	}
-
-	public int getQuantityIncluded() {
-		return quantityIncluded;
-	}
-
-	public boolean isPeriodic() {
-		return isPeriodic;
-	}
-
-	public float getOverageAmount() {
-		return overageAmount;
+	public Date getBillingDatetime() {
+		return billingDatetime;
 	}
 
 	public Date getCreatedDatetime() {
 		return createdDatetime;
 	}
-
-	public Date getModifiedDatetime() {
-		return modifiedDatetime;
+	
+	public List<Transaction> getTransactions(){
+		return transactions;
+	}
+	
+	public List<Charge> getCharges() {
+		return charges;
+	}
+	
+	public double getTotalAmount(){
+		double sum = 0.0d;
+		for(Charge charge : charges){
+			sum += charge.getEachAmount() * charge.getQuantity();
+		}
+		return sum;
 	}
 
-	public CGItem(Element elem){
+	public Invoice(Element elem){
 		this.id = elem.getAttribute("id");
-		this.code = elem.getAttribute("code");
-		this.name = XmlUtils.getNamedElemValue(elem, "name");
-		this.quantity = (Integer)XmlUtils.getNamedElemValue(elem, "quantity", Integer.class, 0);
-		this.quantityIncluded = (Integer)XmlUtils.getNamedElemValue(elem, "quantityIncluded", Integer.class, 0);
-		this.isPeriodic = (Boolean)XmlUtils.getNamedElemValue(elem, "isPeriodic", Boolean.class, false);
-		this.overageAmount = (Float)XmlUtils.getNamedElemValue(elem, "overageAmount", Float.class, 0.0f);
-		this.createdDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-		this.modifiedDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "modifiedDatetime"));
+		this.number = XmlUtils.getNamedElemValue(elem, "number");
+		this.type = XmlUtils.getNamedElemValue(elem, "type");
+		this.billingDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "billingDatetime"));
+		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
+		
+		Element transactionsParent = XmlUtils.getFirstChildByTagName(elem, "transactions");
+		if(transactionsParent != null){
+			List<Element> transactionsList = XmlUtils.getChildrenByTagName(transactionsParent, "transaction");
+			for(Element transaction : transactionsList){
+				this.transactions.add(new Transaction(transaction));
+			}
+		}
+		
+		Element chargesParent = XmlUtils.getFirstChildByTagName(elem, "charges");
+		if(chargesParent != null){
+			List<Element> chargesList = XmlUtils.getChildrenByTagName(chargesParent, "charge");
+			for(Element charge : chargesList){
+				this.charges.add(new Charge(charge));
+			}
+		}
 	}
 }

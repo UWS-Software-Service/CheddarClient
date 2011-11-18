@@ -36,7 +36,6 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -52,8 +51,8 @@ import org.w3c.dom.Element;
 
 import sun.misc.BASE64Encoder;
 
-public class CGService implements ICGService {
-	private static Logger log = Logger.getLogger(CGService.class.toString());
+public class CheddarGetterPaymentService implements PaymentService {
+	private static Logger log = Logger.getLogger(CheddarGetterPaymentService.class.toString());
 	
 	private static String CG_SERVICE_ROOT = "https://cheddargetter.com/xml";
 	
@@ -62,60 +61,60 @@ public class CGService implements ICGService {
 	private String productCode;
 
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#getUserName()
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getUserName()
 	 */
 	public String getUserName(){
 		return userName;
 	}
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#setUserName(java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#setUserName(java.lang.String)
 	 */
 	public void setUserName(String userName){
 		this.userName = userName;
 	}
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#getPassword()
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getPassword()
 	 */
 	public String getPassword(){
 		return password;
 	}
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#setPassword(java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#setPassword(java.lang.String)
 	 */
 	public void setPassword(String password){
 		this.password = password;
 	}
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#getProductCode()
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getProductCode()
 	 */
 	public String getProductCode(){
 		return productCode;
 	}
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#setProductCode(java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#setProductCode(java.lang.String)
 	 */
 	public void setProductCode(String productCode){
 		this.productCode = productCode;
 	}
 	
-	public CGService(){
+	public CheddarGetterPaymentService(){
 	}
 	
-	public CGService(String userName, String password, String productCode){
+	public CheddarGetterPaymentService(String userName, String password, String productCode){
 		setUserName(userName);
 		setPassword(password);
 		setProductCode(productCode);
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#getCustomer(java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getCustomer(java.lang.String)
 	 */
-	public CGCustomer getCustomer(String custCode) throws Exception {
+	public Customer getCustomer(String custCode) throws Exception {
 		Document doc = null;
 		try {
 			doc = makeServiceCall("/customers/get/productCode/" + getProductCode() + "/code/" + custCode, null);
 		}
-		catch (CGException cge){
+		catch (PaymentException cge){
 			//If the exception is just that the customer doesn't exist, return null
 			if(cge.getCode() == 404){
 				return null;
@@ -123,16 +122,16 @@ public class CGService implements ICGService {
 		}
 		Element root = doc.getDocumentElement();
 		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
-		return (customer == null) ? null : new CGCustomer(customer);
+		return (customer == null) ? null : new Customer(customer);
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#customerExists(java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#customerExists(java.lang.String)
 	 */
 	public boolean customerExists(String custCode) {
 		boolean exists = false;
 		try {
-			CGCustomer cust = getCustomer(custCode);
+			Customer cust = getCustomer(custCode);
 			if(cust != null){
 				exists = true;
 			}
@@ -142,7 +141,7 @@ public class CGService implements ICGService {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#getAllCustomers()
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getAllCustomers()
 	 */
 	public Document getAllCustomers() throws Exception {
 		Map<String, String> params = new HashMap<String, String>();
@@ -151,9 +150,9 @@ public class CGService implements ICGService {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#createNewCustomer(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#createNewCustomer(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public CGCustomer createNewCustomer(String custCode, String firstName, String lastName, 
+	public Customer createNewCustomer(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
 			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear, 
 			String ccCardCode, String ccZip) throws Exception {
@@ -187,10 +186,10 @@ public class CGService implements ICGService {
 		Document doc = makeServiceCall("/customers/new/productCode/" + getProductCode(), paramMap);
 		Element root = doc.getDocumentElement();
 		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
-		return new CGCustomer(customer);
+		return new Customer(customer);
 	}
 	
-	public CGCustomer updateCustomerAndSubscription(String custCode, String firstName, String lastName, 
+	public Customer updateCustomerAndSubscription(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
 			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear, 
 			String ccCardCode, String ccZip) throws Exception {
@@ -223,10 +222,10 @@ public class CGService implements ICGService {
 		Document doc = makeServiceCall("/customers/edit/productCode/" + getProductCode() + "/code/" + custCode, paramMap);
 		Element root = doc.getDocumentElement();
 		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
-		return new CGCustomer(customer);
+		return new Customer(customer);
 	}
 	
-	public CGCustomer updateCustomer(String custCode, String firstName, String lastName, 
+	public Customer updateCustomer(String custCode, String firstName, String lastName,
 			String email, String company) throws Exception {
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("firstName", firstName);
@@ -238,11 +237,11 @@ public class CGService implements ICGService {
 		Document doc = makeServiceCall("/customers/edit-customer/productCode/" + getProductCode() + "/code/" + custCode, paramMap);
 		Element root = doc.getDocumentElement();
 		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
-		return new CGCustomer(customer);
+		return new Customer(customer);
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#updateSubscription(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#updateSubscription(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public Document updateSubscription(String customerCode, String planCode, String ccFirstName, String ccLastName,
 			String ccNumber, String ccExpireMonth, String ccExpireYear, String ccCardCode, String ccZip) throws Exception {
@@ -270,21 +269,21 @@ public class CGService implements ICGService {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#cancelSubscription(java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#cancelSubscription(java.lang.String)
 	 */
 	public Document cancelSubscription(String customerCode) throws Exception {
 		return makeServiceCall("/customers/cancel/productCode/" + getProductCode() + "/code/" + customerCode, null);
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#addItemQuantity(java.lang.String, java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#addItemQuantity(java.lang.String, java.lang.String)
 	 */
 	public Document addItemQuantity(String customerCode, String itemCode) throws Exception {
 	    return addItemQuantity(customerCode, itemCode, 1);
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#addItemQuantity(java.lang.String, java.lang.String, int)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#addItemQuantity(java.lang.String, java.lang.String, int)
 	 */
 	public Document addItemQuantity(String customerCode, String itemCode, int quantity) throws Exception {
 	    HashMap<String, String> paramMap = new HashMap<String, String>();
@@ -297,14 +296,14 @@ public class CGService implements ICGService {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#getLatestCreditCardData(java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getLatestCreditCardData(java.lang.String)
 	 */
 	public CreditCardData getLatestCreditCardData(String customerCode) throws Exception {
-		CGCustomer cgCustomer;
-		try { cgCustomer = getCustomer(customerCode); }
+		Customer customer;
+		try { customer = getCustomer(customerCode); }
 		catch (Exception e) { return null; }
 		
-		List<CGSubscription> subs = cgCustomer.getSubscriptions();
+		List<CGSubscription> subs = customer.getSubscriptions();
 		if(subs == null || subs.size() == 0){
 			return null;
 		}
@@ -322,14 +321,14 @@ public class CGService implements ICGService {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#isLatestSubscriptionCanceled(java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#isLatestSubscriptionCanceled(java.lang.String)
 	 */
 	public boolean isLatestSubscriptionCanceled(String customerCode) throws Exception {
-		CGCustomer cgCustomer;
-		try { cgCustomer = getCustomer(customerCode); }
+		Customer customer;
+		try { customer = getCustomer(customerCode); }
 		catch (Exception e) { return false; }
 		
-		List<CGSubscription> subs = cgCustomer.getSubscriptions();
+		List<CGSubscription> subs = customer.getSubscriptions();
 		if(subs == null || subs.size() == 0){
 			return false;
 		}
@@ -343,11 +342,11 @@ public class CGService implements ICGService {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.ICGService#getCurrentItemUsage(java.lang.String, java.lang.String)
+	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getCurrentItemUsage(java.lang.String, java.lang.String)
 	 */
 	public int getCurrentItemUsage(String customerCode, String itemCode) throws Exception{
-	    CGCustomer cgCust = getCustomer(customerCode);
-	    List<CGItem> currentItems = cgCust.getSubscriptions().get(0).getItems();
+	    Customer cust = getCustomer(customerCode);
+	    List<CGItem> currentItems = cust.getSubscriptions().get(0).getItems();
 	    for(CGItem item : currentItems){
 	        if(item.getCode().equals(itemCode)){
 	            return item.getQuantity();
@@ -364,7 +363,7 @@ public class CGService implements ICGService {
 		log.log(Level.FINE, "Response from CG: " + XmlUtils.getXmlString(responseDoc));
 		try {
 			checkResponseForError(responseDoc);
-		} catch (CGException cge) {
+		} catch (PaymentException cge) {
 			//Let's not log 404s when looking for a customer, since we may
 			//often be looking for a customer just to see if they exist, and this
 			//ends up polluting the logs a lot...
@@ -440,7 +439,7 @@ public class CGService implements ICGService {
 		return URLEncoder.encode(paramName, "UTF-8") + "=" + URLEncoder.encode(paramVal, "UTF-8");
 	}
 	
-	protected boolean checkResponseForError(Document doc) throws CGException, Exception {
+	protected boolean checkResponseForError(Document doc) throws PaymentException, Exception {
 		Element root = doc.getDocumentElement();
 		if(root.getNodeName().equals("error")){
 			throw getExceptionFromElement(root);
@@ -457,14 +456,14 @@ public class CGService implements ICGService {
 		return true;
 	}
 	
-	protected CGException getExceptionFromElement(Element errorElem){
+	protected PaymentException getExceptionFromElement(Element errorElem){
 		String code = errorElem.getAttribute("code");
 		String auxCode = errorElem.getAttribute("auxCode");
 		if(auxCode == null || auxCode.length() == 0){
 			auxCode = "0";
 		}
 		String message = errorElem.getTextContent();
-		return new CGException(Integer.parseInt(code), Integer.parseInt(auxCode), message);
+		return new PaymentException(Integer.parseInt(code), Integer.parseInt(auxCode), message);
 	}
 	
 	public static Date parseCgDate(String cgDate) {

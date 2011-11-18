@@ -28,67 +28,65 @@
 
 package com.rusticisoftware.cheddargetter.client;
 
-import java.util.HashMap;
+import org.w3c.dom.Document;
+
 import java.util.Map;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+public interface PaymentService {
 
-public interface ICGService {
+	String getUserName();
 
-	public abstract String getUserName();
+	void setUserName(String userName);
 
-	public abstract void setUserName(String userName);
+	String getPassword();
 
-	public abstract String getPassword();
+	void setPassword(String password);
 
-	public abstract void setPassword(String password);
+	String getProductCode();
 
-	public abstract String getProductCode();
+	void setProductCode(String productCode);
 
-	public abstract void setProductCode(String productCode);
+	Customer getCustomer(String custCode) throws Exception;
 
-	public abstract CGCustomer getCustomer(String custCode) throws Exception;
+	boolean customerExists(String custCode);
 
-	public abstract boolean customerExists(String custCode);
+	Document getAllCustomers() throws Exception;
 
-	public abstract Document getAllCustomers() throws Exception;
-
-	public abstract CGCustomer createNewCustomer(String custCode,
+	Customer createNewCustomer(String custCode,
 			String firstName, String lastName, String email, String company,
 			String subscriptionPlanCode, String ccFirstName, String ccLastName,
 			String ccNumber, String ccExpireMonth, String ccExpireYear,
 			String ccCardCode, String ccZip) throws Exception;
 	
-	public CGCustomer updateCustomerAndSubscription(String custCode, String firstName, String lastName, 
+	public Customer updateCustomerAndSubscription(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
 			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear, 
 			String ccCardCode, String ccZip) throws Exception;
 	
-	public CGCustomer updateCustomer(String custCode, String firstName, String lastName, 
+	public Customer updateCustomer(String custCode, String firstName, String lastName,
 			String email, String company) throws Exception;
 
-	public abstract Document updateSubscription(String customerCode,
+	Document updateSubscription(String customerCode,
 			String planCode, String ccFirstName, String ccLastName,
 			String ccNumber, String ccExpireMonth, String ccExpireYear,
 			String ccCardCode, String ccZip) throws Exception;
 
-	public abstract Document cancelSubscription(String customerCode)
+	Document cancelSubscription(String customerCode)
 			throws Exception;
 
-	public abstract Document addItemQuantity(String customerCode,
+	Document addItemQuantity(String customerCode,
 			String itemCode) throws Exception;
 
-	public abstract Document addItemQuantity(String customerCode,
+	Document addItemQuantity(String customerCode,
 			String itemCode, int quantity) throws Exception;
 
-	public abstract CreditCardData getLatestCreditCardData(String customerCode)
+	CreditCardData getLatestCreditCardData(String customerCode)
 			throws Exception;
 
-	public abstract boolean isLatestSubscriptionCanceled(String customerCode)
+	boolean isLatestSubscriptionCanceled(String customerCode)
 			throws Exception;
 
-	public abstract int getCurrentItemUsage(String customerCode, String itemCode)
+	int getCurrentItemUsage(String customerCode, String itemCode)
 			throws Exception;
 	
 	public Document makeServiceCall(String path, Map<String,String> paramMap) throws Exception;

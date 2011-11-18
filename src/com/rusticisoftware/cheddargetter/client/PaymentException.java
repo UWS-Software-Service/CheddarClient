@@ -28,65 +28,46 @@
 
 package com.rusticisoftware.cheddargetter.client;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.w3c.dom.Element;
-
-public class CGTransaction implements Serializable {
-	protected String id;
-	protected String code;
-	protected String parentId;
-	//CGGatewayAccount ?
-	protected float amount;
-	protected String memo;
-	protected String response;
-	protected Date transactedDatetime;
-	protected Date createdDatetime;
+public class PaymentException extends Exception {
+	public static final int REQUEST_INVALID = 400;
+	public static final int NOT_AUTHORIZED = 401;
+	public static final int NOT_FOUND = 404;
+	public static final int PRECONDITION_FAILED = 412;
+	public static final int DATA_INVALID = 500;
+	public static final int USAGE_INVALID = 500;
+	public static final int UNKNOWN = 500;
+	public static final int BAD_GATEWAY = 512;
 	
-	public String getId() {
-		return id;
-	}
-
-	public String getCode() {
+	private int code = UNKNOWN;
+	private int auxCode = 0;
+	
+	public int getCode(){
 		return code;
 	}
-
-	public String getParentId() {
-		return parentId;
-	}
-
-	public float getAmount() {
-		return amount;
-	}
-
-	public String getMemo() {
-		return memo;
-	}
-
-	public String getResponse() {
-		return response;
-	}
-
-	public Date getTransactedDatetime() {
-		return transactedDatetime;
-	}
-
-	public Date getCreatedDatetime() {
-		return createdDatetime;
-	}
-
-	public CGTransaction(Element elem) {
-		this.id = elem.getAttribute("id");
-		this.code = elem.getAttribute("code");
-		this.parentId = XmlUtils.getNamedElemValue(elem, "parentId");
-		this.amount = (Float)XmlUtils.getNamedElemValue(elem, "amount", Float.class, 0.0f);
-		this.memo = XmlUtils.getNamedElemValue(elem, "memo");
-		this.response = XmlUtils.getNamedElemValue(elem, "response");
-		this.transactedDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "transactedDatetime"));
-		this.createdDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
+	public void setCode(int code){
+		this.code = code;
 	}
 	
+	public int getAuxCode(){
+		return auxCode;
+	}
+	public void setAuxCode(int auxCode){
+		this.auxCode = auxCode;
+	}
+	
+	public PaymentException(int code, int auxCode, String message){
+		super(message);
+		this.setCode(code);
+		this.setAuxCode(auxCode);
+	}
+	
+	public String toString(){
+		return "PaymentException: Code = " + getCode() +
+				(auxCode == 0 ? "" : ", AuxCode = " + auxCode) +
+				", Message = " + this.getMessage();
+	}
+	
+	public boolean isGatewayError(){
+		return (auxCode != 0 && (auxCode < 5000 || auxCode >= 7000));
+	}
 }

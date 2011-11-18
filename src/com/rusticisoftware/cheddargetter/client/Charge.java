@@ -29,78 +29,54 @@
 package com.rusticisoftware.cheddargetter.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.w3c.dom.Element;
 
-public class CGInvoice implements Serializable {
+public class Charge implements Serializable {
 	protected String id;
-	protected String number;
+	protected String code;
 	protected String type;
-	protected Date billingDatetime;
+	protected float quantity;
+	protected float eachAmount;
+	protected String description;
 	protected Date createdDatetime;
-	protected List<CGTransaction> transactions = new ArrayList<CGTransaction>();
-	protected List<CGCharge> charges = new ArrayList<CGCharge>();
 	
 	public String getId() {
 		return id;
 	}
 
-	public String getNumber() {
-		return number;
+	public String getCode() {
+		return code;
 	}
 
 	public String getType() {
 		return type;
 	}
 
-	public Date getBillingDatetime() {
-		return billingDatetime;
+	public float getQuantity() {
+		return quantity;
+	}
+
+	public float getEachAmount() {
+		return eachAmount;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	public Date getCreatedDatetime() {
 		return createdDatetime;
 	}
-	
-	public List<CGTransaction> getTransactions(){
-		return transactions;
-	}
-	
-	public List<CGCharge> getCharges() {
-		return charges;
-	}
-	
-	public double getTotalAmount(){
-		double sum = 0.0d;
-		for(CGCharge charge : charges){
-			sum += charge.getEachAmount() * charge.getQuantity();
-		}
-		return sum;
-	}
 
-	public CGInvoice(Element elem){
+	public Charge(Element elem){
 		this.id = elem.getAttribute("id");
-		this.number = XmlUtils.getNamedElemValue(elem, "number");
+		this.code = elem.getAttribute("code");
 		this.type = XmlUtils.getNamedElemValue(elem, "type");
-		this.billingDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "billingDatetime"));
-		this.createdDatetime = CGService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-		
-		Element transactionsParent = XmlUtils.getFirstChildByTagName(elem, "transactions");
-		if(transactionsParent != null){
-			List<Element> transactionsList = XmlUtils.getChildrenByTagName(transactionsParent, "transaction");
-			for(Element transaction : transactionsList){
-				this.transactions.add(new CGTransaction(transaction));
-			}
-		}
-		
-		Element chargesParent = XmlUtils.getFirstChildByTagName(elem, "charges");
-		if(chargesParent != null){
-			List<Element> chargesList = XmlUtils.getChildrenByTagName(chargesParent, "charge");
-			for(Element charge : chargesList){
-				this.charges.add(new CGCharge(charge));
-			}
-		}
+		this.quantity = (Float)XmlUtils.getNamedElemValue(elem, "quantity", Float.class, 0);
+		this.eachAmount = (Float)XmlUtils.getNamedElemValue(elem, "eachAmount", Float.class, 0.0f);
+		this.description = XmlUtils.getNamedElemValue(elem, "description");
+		this.createdDatetime = DefaultCheddarGetterService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
 	}
 }
