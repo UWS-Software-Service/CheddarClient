@@ -47,9 +47,9 @@ public class Subscription {
 	protected Date ccExpirationDate;
 	protected Date canceledDatetime;
 	protected Date createdDatetime;
-	protected List<CGPlan> plans = new ArrayList<CGPlan>();
-	protected List<CGItem> items = new ArrayList<CGItem>();
-	protected List<CGInvoice> invoices = new ArrayList<CGInvoice>();
+	protected List<Plan> plans = new ArrayList<Plan>();
+	protected List<Item> items = new ArrayList<Item>();
+	protected List<Invoice> invoices = new ArrayList<Invoice>();
 	
 	public String getId() {
 		return id;
@@ -87,15 +87,15 @@ public class Subscription {
 		return createdDatetime;
 	}
 
-	public List<CGPlan> getPlans() {
+	public List<Plan> getPlans() {
 		return plans;
 	}
 
-	public List<CGItem> getItems() {
+	public List<Item> getItems() {
 		return items;
 	}
 
-	public List<CGInvoice> getInvoices() {
+	public List<Invoice> getInvoices() {
 		return invoices;
 	}
 
@@ -114,34 +114,34 @@ public class Subscription {
 		
 		Element plansParent = XmlUtils.getFirstChildByTagName(elem, "plans");
 		if(plansParent != null){
-			this.plans = new ArrayList<CGPlan>();
+			this.plans = new ArrayList<Plan>();
 			List<Element> planList = XmlUtils.getChildrenByTagName(plansParent, "plan");
 			for(Element plan : planList){
-				this.plans.add(new CGPlan(plan));
+				this.plans.add(new Plan(plan));
 			}
 		}
 		
 		Element itemsParent = XmlUtils.getFirstChildByTagName(elem, "items");
 		if(itemsParent != null){
-			this.items = new ArrayList<CGItem>();
+			this.items = new ArrayList<Item>();
 			List<Element> itemList = XmlUtils.getChildrenByTagName(itemsParent, "item");
 			for(Element item : itemList){
-				this.items.add(new CGItem(item));
+				this.items.add(new Item(item));
 			}
 		}
 		
 		Element invoicesParent = XmlUtils.getFirstChildByTagName(elem, "invoices");
 		if(invoicesParent != null){
-			this.invoices = new ArrayList<CGInvoice>();
+			this.invoices = new ArrayList<Invoice>();
 			List<Element> invoiceList = XmlUtils.getChildrenByTagName(invoicesParent, "invoice");
 			for(Element invoice : invoiceList){
-				this.invoices.add(new CGInvoice(invoice));
+				this.invoices.add(new Invoice(invoice));
 			}
 			
 			//Sort invoices by billing date (most recent first)
 			Collections.sort(this.invoices, 
-				new Comparator<CGInvoice>() {
-					public int compare(CGInvoice inv1, CGInvoice inv2) {
+				new Comparator<Invoice>() {
+					public int compare(Invoice inv1, Invoice inv2) {
 						return inv2.getBillingDatetime().compareTo(inv1.getBillingDatetime());
 					}
 				});

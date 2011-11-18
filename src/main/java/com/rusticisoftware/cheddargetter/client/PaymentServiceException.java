@@ -28,7 +28,7 @@
 
 package com.rusticisoftware.cheddargetter.client;
 
-public class PaymentServiceException extends Exception {
+public class PaymentServiceException extends PaymentException {
 	public static final int REQUEST_INVALID = 400;
 	public static final int NOT_AUTHORIZED = 401;
 	public static final int NOT_FOUND = 404;

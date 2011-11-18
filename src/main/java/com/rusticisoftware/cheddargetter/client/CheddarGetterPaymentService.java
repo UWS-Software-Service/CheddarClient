@@ -28,14 +28,8 @@
 
 package com.rusticisoftware.cheddargetter.client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.io.*;
+import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,7 +43,10 @@ import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.xml.sax.SAXException;
 import sun.misc.BASE64Encoder;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class CheddarGetterPaymentService implements PaymentService {
 	private static Logger log = Logger.getLogger(CheddarGetterPaymentService.class.toString());
@@ -109,12 +106,12 @@ public class CheddarGetterPaymentService implements PaymentService {
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getCustomer(java.lang.String)
 	 */
-	public Customer getCustomer(String custCode) throws Exception {
+	public Customer getCustomer(String custCode) throws PaymentException {
 		Document doc = null;
 		try {
 			doc = makeServiceCall("/customers/get/productCode/" + getProductCode() + "/code/" + custCode, null);
 		}
-		catch (PaymentException cge){
+		catch (PaymentServiceException cge){
 			//If the exception is just that the customer doesn't exist, return null
 			if(cge.getCode() == 404){
 				return null;
@@ -124,7 +121,7 @@ public class CheddarGetterPaymentService implements PaymentService {
 		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
 		return (customer == null) ? null : new Customer(customer);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#customerExists(java.lang.String)
 	 */
@@ -139,24 +136,24 @@ public class CheddarGetterPaymentService implements PaymentService {
 		catch (Exception e) {}
 		return exists;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getAllCustomers()
 	 */
-	public Document getAllCustomers() throws Exception {
+	public Document getAllCustomers() throws PaymentException {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("subscriptionStatus", "activeOnly");
 		return makeServiceCall("/customers/get/productCode/" + getProductCode(), params);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#createNewCustomer(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public Customer createNewCustomer(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
-			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear, 
-			String ccCardCode, String ccZip) throws Exception {
-		
+			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear,
+			String ccCardCode, String ccZip) throws PaymentException {
+
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("code", custCode);
 		paramMap.put("firstName", firstName);
@@ -165,9 +162,9 @@ public class CheddarGetterPaymentService implements PaymentService {
 		if(company != null){
 			paramMap.put("company", company);
 		}
-		
+
 		paramMap.put("subscription[planCode]", subscriptionPlanCode);
-		
+
 		//If plan is free, no cc information needed, so we just check
 		//ccNumber field and assume the rest are there or not
 		if(ccNumber != null){
@@ -188,12 +185,12 @@ public class CheddarGetterPaymentService implements PaymentService {
 		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
 		return new Customer(customer);
 	}
-	
+
 	public Customer updateCustomerAndSubscription(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
-			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear, 
-			String ccCardCode, String ccZip) throws Exception {
-		
+			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear,
+			String ccCardCode, String ccZip) throws PaymentException {
+
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("firstName", firstName);
 		paramMap.put("lastName", lastName);
@@ -201,9 +198,9 @@ public class CheddarGetterPaymentService implements PaymentService {
 		if(company != null){
 			paramMap.put("company", company);
 		}
-		
+
 		paramMap.put("subscription[planCode]", subscriptionPlanCode);
-		
+
 		//If plan is free, no cc information needed, so we just check
 		//ccNumber field and assume the rest are there or not
 		if(ccNumber != null){
@@ -224,9 +221,9 @@ public class CheddarGetterPaymentService implements PaymentService {
 		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
 		return new Customer(customer);
 	}
-	
+
 	public Customer updateCustomer(String custCode, String firstName, String lastName,
-			String email, String company) throws Exception {
+			String email, String company) throws PaymentException {
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("firstName", firstName);
 		paramMap.put("lastName", lastName);
@@ -239,16 +236,16 @@ public class CheddarGetterPaymentService implements PaymentService {
 		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
 		return new Customer(customer);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#updateSubscription(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public Document updateSubscription(String customerCode, String planCode, String ccFirstName, String ccLastName,
-			String ccNumber, String ccExpireMonth, String ccExpireYear, String ccCardCode, String ccZip) throws Exception {
-		
+			String ccNumber, String ccExpireMonth, String ccExpireYear, String ccCardCode, String ccZip) throws PaymentException {
+
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("planCode", planCode);
-		
+
 		//If plan is free, no cc information needed, so we just check
 		//ccNumber field and assume the rest are there or not
 		if(ccNumber != null){
@@ -263,107 +260,116 @@ public class CheddarGetterPaymentService implements PaymentService {
 				paramMap.put("ccZip", ccZip);
 			}
 		}
-		
+
 		String relativeUrl = "/customers/edit-subscription/productCode/" + getProductCode() + "/code/" + customerCode;
 		return makeServiceCall(relativeUrl, paramMap);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#cancelSubscription(java.lang.String)
 	 */
-	public Document cancelSubscription(String customerCode) throws Exception {
+	public Document cancelSubscription(String customerCode) throws PaymentException {
 		return makeServiceCall("/customers/cancel/productCode/" + getProductCode() + "/code/" + customerCode, null);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#addItemQuantity(java.lang.String, java.lang.String)
 	 */
-	public Document addItemQuantity(String customerCode, String itemCode) throws Exception {
+	public Document addItemQuantity(String customerCode, String itemCode) throws PaymentException {
 	    return addItemQuantity(customerCode, itemCode, 1);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#addItemQuantity(java.lang.String, java.lang.String, int)
 	 */
-	public Document addItemQuantity(String customerCode, String itemCode, int quantity) throws Exception {
+	public Document addItemQuantity(String customerCode, String itemCode, int quantity) throws PaymentException {
 	    HashMap<String, String> paramMap = new HashMap<String, String>();
 	    paramMap.put("quantity", String.valueOf(quantity));
-	    
-	    String relativeUrl = "/customers/add-item-quantity/productCode/" + getProductCode() + 
+
+	    String relativeUrl = "/customers/add-item-quantity/productCode/" + getProductCode() +
 	                         "/code/" + customerCode + "/itemCode/" + itemCode;
 	    return makeServiceCall(relativeUrl, paramMap);
-	    
+
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getLatestCreditCardData(java.lang.String)
 	 */
-	public CreditCardData getLatestCreditCardData(String customerCode) throws Exception {
+	public CreditCardData getLatestCreditCardData(String customerCode) throws PaymentException {
 		Customer customer;
 		try { customer = getCustomer(customerCode); }
 		catch (Exception e) { return null; }
-		
-		List<CGSubscription> subs = customer.getSubscriptions();
+
+		List<Subscription> subs = customer.getSubscriptions();
 		if(subs == null || subs.size() == 0){
 			return null;
 		}
-		
-		CGSubscription sub = subs.get(0);
+
+		Subscription sub = subs.get(0);
 		if(sub.getCcExpirationDate() == null){
 			return null;
 		}
-		
+
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		cal.setTime(sub.getCcExpirationDate());
-		return new CreditCardData(sub.getCcFirstName(), sub.getCcLastName(), 
-				sub.getCcType(), sub.getCcLastFour(), 
+		return new CreditCardData(sub.getCcFirstName(), sub.getCcLastName(),
+				sub.getCcType(), sub.getCcLastFour(),
 				cal.get(Calendar.MONTH), cal.get(Calendar.YEAR));
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#isLatestSubscriptionCanceled(java.lang.String)
 	 */
-	public boolean isLatestSubscriptionCanceled(String customerCode) throws Exception {
+	public boolean isLatestSubscriptionCanceled(String customerCode) throws PaymentException {
 		Customer customer;
 		try { customer = getCustomer(customerCode); }
 		catch (Exception e) { return false; }
-		
-		List<CGSubscription> subs = customer.getSubscriptions();
+
+		List<Subscription> subs = customer.getSubscriptions();
 		if(subs == null || subs.size() == 0){
 			return false;
 		}
-		
-		CGSubscription sub = subs.get(0);
+
+		Subscription sub = subs.get(0);
 		if(sub.getCanceledDatetime() == null){
 			return false;
 		}
 
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getCurrentItemUsage(java.lang.String, java.lang.String)
 	 */
-	public int getCurrentItemUsage(String customerCode, String itemCode) throws Exception{
+	public int getCurrentItemUsage(String customerCode, String itemCode) throws PaymentException{
 	    Customer cust = getCustomer(customerCode);
-	    List<CGItem> currentItems = cust.getSubscriptions().get(0).getItems();
-	    for(CGItem item : currentItems){
+	    List<Item> currentItems = cust.getSubscriptions().get(0).getItems();
+	    for(Item item : currentItems){
 	        if(item.getCode().equals(itemCode)){
 	            return item.getQuantity();
 	        }
 	    }
-	    throw new Exception("Couldn't find item with code " + itemCode);
+	    throw new PaymentException("Couldn't find item with code " + itemCode);
 	}
-	
-	public Document makeServiceCall(String path, Map<String,String> paramMap) throws Exception {
+
+	public Document makeServiceCall(String path, Map<String,String> paramMap) throws PaymentException {
 		String fullPath = CG_SERVICE_ROOT + path;
 		String encodedParams = encodeParamMap(paramMap);
 		String response = postTo(fullPath, getUserName(), getPassword(), encodedParams);
-		Document responseDoc = XmlUtils.parseXmlString(response);
-		log.log(Level.FINE, "Response from CG: " + XmlUtils.getXmlString(responseDoc));
+        Document document = null;
+        try {
+            document = XmlUtils.parseXmlString(response);
+            log.log(Level.FINE, "Response from CG: " + XmlUtils.getXmlString(document));
+        } catch (ParserConfigurationException e) {
+            throw new IllegalStateException("Unable to create XML parser", e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to read from response", e);
+        } catch (SAXException e) {
+            throw new PaymentException("Unable to parse XML response.", e);
+        }
 		try {
-			checkResponseForError(responseDoc);
-		} catch (PaymentException cge) {
+			checkResponseForError(document);
+		} catch (PaymentServiceException cge) {
 			//Let's not log 404s when looking for a customer, since we may
 			//often be looking for a customer just to see if they exist, and this
 			//ends up polluting the logs a lot...
@@ -373,55 +379,63 @@ public class CheddarGetterPaymentService implements PaymentService {
 				throw cge;
 			}
 		}
-		return responseDoc;
+		return document;
 	}
-	
-	protected String postTo(String urlStr, String userName, String password, String data) throws Exception {
+
+	protected String postTo(String urlStr, String userName, String password, String data) throws PaymentException {
 
 		log.fine("Sending this data to this url: " + urlStr + " data = " + data);
-		
+
 		//Create a new request to send this data...
-		URL url = new URL(urlStr);
-		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-		
-		//Put authentication fields in http header, and make the data the body
-		BASE64Encoder enc = new BASE64Encoder();
-		//connection.setRequestProperty("Content-Type", "text/xml");
-		String auth = userName + ":" + password;
-		connection.setRequestProperty("Authorization", "Basic " + enc.encode(auth.getBytes()));
-		
-		
-		connection.setRequestMethod("POST");
-		connection.setDoOutput(true);
-		connection.setDoInput(true);
-		connection.setUseCaches(false);
-		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        try {
+            URL url = new URL(urlStr);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 
-		PrintWriter output = new PrintWriter(new OutputStreamWriter(connection.getOutputStream()));
-		output.write(data);
-		output.flush();
-		output.close();
+            //Put authentication fields in http header, and make the data the body
+            BASE64Encoder enc = new BASE64Encoder();
+            //connection.setRequestProperty("Content-Type", "text/xml");
+            String auth = userName + ":" + password;
+            connection.setRequestProperty("Authorization", "Basic " + enc.encode(auth.getBytes()));
 
-		//Get response
-		BufferedReader rd;
-		try {
-			rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-		} catch (IOException ioe) {
-			rd = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-		}
-		
-		StringBuilder response = new StringBuilder();
-		String responseLine = null;
-		while((responseLine = rd.readLine()) != null){
-			response.append(responseLine);
-		}
-		
-		log.fine("Got this back from CG: " + response.toString());
-		
-		return response.toString();
-	}
-	
-	protected String encodeParamMap(Map<String, String> paramMap) throws Exception {
+
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setUseCaches(false);
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+            PrintWriter output = new PrintWriter(new OutputStreamWriter(connection.getOutputStream()));
+            output.write(data);
+            output.flush();
+            output.close();
+
+            //Get response
+            BufferedReader rd;
+            try {
+                rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            } catch (IOException ioe) {
+                rd = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+            }
+
+            StringBuilder response = new StringBuilder();
+            String responseLine = null;
+            while((responseLine = rd.readLine()) != null){
+                response.append(responseLine);
+            }
+
+            log.fine("Got this back from CG: " + response.toString());
+
+            return response.toString();
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Provided service URL not correct.", e);
+        } catch (ProtocolException e) {
+            throw new IllegalStateException("POST method not found on protocol.", e);
+        } catch (IOException e) {
+            throw new PaymentException("Communications exception occurred while processing request", e);
+        }
+    }
+
+	protected String encodeParamMap(Map<String, String> paramMap) throws PaymentException {
 		if(paramMap == null || paramMap.keySet().size() == 0){
 			return "";
 		}
@@ -431,15 +445,19 @@ public class CheddarGetterPaymentService implements PaymentService {
 		}
 		//Cutoff last ampersand
 		encoded.delete(encoded.length() - 1, encoded.length());
-		
+
 		return encoded.toString();
 	}
+
+	protected String getEncodedParam(String paramName, String paramVal) {
+        try {
+            return URLEncoder.encode(paramName, "UTF-8") + "=" + URLEncoder.encode(paramVal, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("UTF-8 encoding not found.", e);
+        }
+    }
 	
-	protected String getEncodedParam(String paramName, String paramVal) throws Exception {
-		return URLEncoder.encode(paramName, "UTF-8") + "=" + URLEncoder.encode(paramVal, "UTF-8");
-	}
-	
-	protected boolean checkResponseForError(Document doc) throws PaymentException, Exception {
+	protected boolean checkResponseForError(Document doc) throws PaymentException {
 		Element root = doc.getDocumentElement();
 		if(root.getNodeName().equals("error")){
 			throw getExceptionFromElement(root);
@@ -456,14 +474,14 @@ public class CheddarGetterPaymentService implements PaymentService {
 		return true;
 	}
 	
-	protected PaymentException getExceptionFromElement(Element errorElem){
+	protected PaymentServiceException getExceptionFromElement(Element errorElem){
 		String code = errorElem.getAttribute("code");
 		String auxCode = errorElem.getAttribute("auxCode");
 		if(auxCode == null || auxCode.length() == 0){
 			auxCode = "0";
 		}
 		String message = errorElem.getTextContent();
-		return new PaymentException(Integer.parseInt(code), Integer.parseInt(auxCode), message);
+		return new PaymentServiceException(Integer.parseInt(code), Integer.parseInt(auxCode), message);
 	}
 	
 	public static Date parseCgDate(String cgDate) {

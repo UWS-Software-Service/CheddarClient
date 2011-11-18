@@ -29,25 +29,18 @@
 package com.rusticisoftware.cheddargetter.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
 import org.w3c.dom.Element;
 
-public class Customer implements Serializable {
+public class Charge implements Serializable {
 	protected String id;
 	protected String code;
-	protected String firstName;
-	protected String lastName;
-	protected String company;
-	protected String email;
-	protected String gatewayToken;
+	protected String type;
+	protected float quantity;
+	protected float eachAmount;
+	protected String description;
 	protected Date createdDatetime;
-	protected Date modifiedDatetime;
-	protected List<CGSubscription> subscriptions = new ArrayList<CGSubscription>();
 	
 	public String getId() {
 		return id;
@@ -57,63 +50,33 @@ public class Customer implements Serializable {
 		return code;
 	}
 
-	public String getFirstName() {
-		return firstName;
+	public String getType() {
+		return type;
 	}
 
-	public String getLastName() {
-		return lastName;
+	public float getQuantity() {
+		return quantity;
 	}
 
-	public String getCompany() {
-		return company;
+	public float getEachAmount() {
+		return eachAmount;
 	}
 
-	public String getEmail() {
-		return email;
-	}
-
-	public String getGatewayToken() {
-		return gatewayToken;
+	public String getDescription() {
+		return description;
 	}
 
 	public Date getCreatedDatetime() {
 		return createdDatetime;
 	}
 
-	public Date getModifiedDatetime() {
-		return modifiedDatetime;
-	}
-
-	public List<CGSubscription> getSubscriptions() {
-		return subscriptions;
-	}
-
-	public Customer(Element elem){
+	public Charge(Element elem){
 		this.id = elem.getAttribute("id");
 		this.code = elem.getAttribute("code");
-		this.firstName = XmlUtils.getNamedElemValue(elem, "firstName");
-		this.lastName = XmlUtils.getNamedElemValue(elem, "lastName");
-		this.company = XmlUtils.getNamedElemValue(elem, "company");
-		this.email = XmlUtils.getNamedElemValue(elem, "email");
-		this.gatewayToken = XmlUtils.getNamedElemValue(elem, "gatewayToken");
-		this.createdDatetime = DefaultCheddarGetterService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-		this.modifiedDatetime = DefaultCheddarGetterService.parseCgDate(XmlUtils.getNamedElemValue(elem, "modifiedDatetime"));
-		
-		Element subsParent = XmlUtils.getFirstChildByTagName(elem, "subscriptions");
-		if(subsParent != null){
-			List<Element> subsList = XmlUtils.getChildrenByTagName(subsParent, "subscription");
-			for(Element sub : subsList){
-				this.subscriptions.add(new CGSubscription(sub));
-			}
-			
-			//Sort subscriptions by create date (most recent first)
-			Collections.sort(this.subscriptions, 
-				new Comparator<CGSubscription>() {
-					public int compare(CGSubscription sub1, CGSubscription sub2) {
-						return sub2.getCreatedDatetime().compareTo(sub1.getCreatedDatetime());
-					}
-				});
-		}
+		this.type = XmlUtils.getNamedElemValue(elem, "type");
+		this.quantity = (Float)XmlUtils.getNamedElemValue(elem, "quantity", Float.class, 0);
+		this.eachAmount = (Float)XmlUtils.getNamedElemValue(elem, "eachAmount", Float.class, 0.0f);
+		this.description = XmlUtils.getNamedElemValue(elem, "description");
+		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
 	}
 }

@@ -34,18 +34,6 @@ import java.util.Map;
 
 public interface PaymentService {
 
-	String getUserName();
-
-	void setUserName(String userName);
-
-	String getPassword();
-
-	void setPassword(String password);
-
-	String getProductCode();
-
-	void setProductCode(String productCode);
-
 	Customer getCustomer(String custCode) throws Exception;
 
 	boolean customerExists(String custCode);
