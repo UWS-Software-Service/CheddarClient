@@ -1,11 +1,24 @@
 package com.rusticisoftware.cheddargetter.client;
 
-/**
- * Created by IntelliJ IDEA.
- * User: mtrimpe
- * Date: 11/19/11
- * Time: 12:38 AM
- * To change this template use File | Settings | File Templates.
- */
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
+
+@XmlRootElement
 public class Customers {
+
+    private List<Customer> customer;
+
+    public Customers() {
+    }
+
+    @XmlElement
+    public List<Customer> getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(List<Customer> customer) {
+        this.customer = customer;
+    }
 }

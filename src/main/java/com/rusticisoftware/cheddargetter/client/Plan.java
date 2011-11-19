@@ -34,25 +34,34 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
-public class Plan {
-	protected String code;
-	protected String id;
-	protected String name;
-	protected String description;
-	protected boolean isActive;
-	protected int trialDays;
-	protected String billingFrequency;
-	protected String billingFrequencyPer;
-	protected String billingFrequencyUnit;
-	protected int billingFrequencyQuantity;
-	protected String setupChargeCode;
-	protected float setupChargeAmount;
-	protected String recurringChargeCode;
-	protected float recurringChargeAmount;
-	protected Date createdDatetime;
-	protected List<Item> items = new ArrayList<Item>();
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-	public String getCode() {
+@XmlRootElement
+public class Plan {
+
+	protected @XmlAttribute String code;
+	protected @XmlAttribute String id;
+	protected @XmlElement String name;
+	protected @XmlElement String description;
+	protected @XmlElement boolean isActive;
+	protected @XmlElement int trialDays;
+	protected @XmlElement String billingFrequency;
+	protected @XmlElement String billingFrequencyPer;
+	protected @XmlElement String billingFrequencyUnit;
+	protected @XmlElement int billingFrequencyQuantity;
+	protected @XmlElement String setupChargeCode;
+	protected @XmlElement float setupChargeAmount;
+	protected @XmlElement String recurringChargeCode;
+	protected @XmlElement float recurringChargeAmount;
+	protected Date createdDatetime;
+	protected @XmlElement List<Item> items = new ArrayList<Item>();
+
+    public Plan() {
+    }
+
+    public String getCode() {
 		return code;
 	}
 

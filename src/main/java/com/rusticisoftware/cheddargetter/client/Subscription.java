@@ -36,22 +36,32 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Subscription {
-	
-	protected String id;
-	protected String gatewayToken;
-	protected String ccFirstName;
-	protected String ccLastName;
-	protected String ccType;
-	protected String ccLastFour;
+
+	protected @XmlAttribute String id;
+	protected @XmlElement String gatewayToken;
+	protected @XmlElement String ccFirstName;
+	protected @XmlElement String ccLastName;
+	protected @XmlElement String ccType;
+	protected @XmlElement String ccLastFour;
 	protected Date ccExpirationDate;
 	protected Date canceledDatetime;
 	protected Date createdDatetime;
-	protected List<Plan> plans = new ArrayList<Plan>();
-	protected List<Item> items = new ArrayList<Item>();
-	protected List<Invoice> invoices = new ArrayList<Invoice>();
-	
-	public String getId() {
+
+	protected @XmlElement List<Plan> plans = new ArrayList<Plan>();
+	protected @XmlElement List<Item> items = new ArrayList<Item>();
+	protected @XmlElement List<Invoice> invoices = new ArrayList<Invoice>();
+
+    public Subscription() {
+    }
+
+    public String getId() {
 		return id;
 	}
 

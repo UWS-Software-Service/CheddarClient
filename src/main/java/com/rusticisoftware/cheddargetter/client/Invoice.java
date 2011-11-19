@@ -35,16 +35,24 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Invoice implements Serializable {
-	protected String id;
-	protected String number;
-	protected String type;
+	protected @XmlAttribute String id;
+	protected @XmlElement String number;
+	protected @XmlElement String type;
 	protected Date billingDatetime;
 	protected Date createdDatetime;
-	protected List<Transaction> transactions = new ArrayList<Transaction>();
-	protected List<Charge> charges = new ArrayList<Charge>();
-	
-	public String getId() {
+	protected @XmlElement List<Transaction> transactions = new ArrayList<Transaction>();
+	protected @XmlElement List<Charge> charges = new ArrayList<Charge>();
+
+    public Invoice() {
+    }
+
+    public String getId() {
 		return id;
 	}
 

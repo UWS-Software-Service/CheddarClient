@@ -32,18 +32,26 @@ import java.util.Date;
 
 import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Item {
-	protected String id;
-	protected String code;
-	protected String name;
-	protected int quantity;
-	protected int quantityIncluded;
-	protected boolean isPeriodic;
-	protected float overageAmount;
+	protected @XmlAttribute String id;
+	protected @XmlAttribute String code;
+	protected @XmlElement String name;
+	protected @XmlElement int quantity;
+	protected @XmlElement int quantityIncluded;
+	protected @XmlElement boolean isPeriodic;
+	protected @XmlElement float overageAmount;
 	protected Date createdDatetime;
 	protected Date modifiedDatetime;
-	
-	public String getId() {
+
+    public Item() {
+    }
+
+    public String getId() {
 		return id;
 	}
 

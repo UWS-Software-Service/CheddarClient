@@ -33,16 +33,24 @@ import java.util.Date;
 
 import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Charge implements Serializable {
-	protected String id;
-	protected String code;
-	protected String type;
-	protected float quantity;
-	protected float eachAmount;
-	protected String description;
+	protected @XmlAttribute String id;
+	protected @XmlAttribute String code;
+	protected @XmlElement String type;
+	protected @XmlElement float quantity;
+	protected @XmlElement float eachAmount;
+	protected @XmlElement String description;
 	protected Date createdDatetime;
-	
-	public String getId() {
+
+    public Charge() {
+    }
+
+    public String getId() {
 		return id;
 	}
 

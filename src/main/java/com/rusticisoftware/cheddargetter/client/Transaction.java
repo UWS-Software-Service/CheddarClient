@@ -33,18 +33,26 @@ import java.util.Date;
 
 import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Transaction implements Serializable {
-	protected String id;
-	protected String code;
-	protected String parentId;
+	protected @XmlAttribute String id;
+	protected @XmlAttribute String code;
+	protected @XmlElement String parentId;
 	//CGGatewayAccount ?
-	protected float amount;
-	protected String memo;
-	protected String response;
+	protected @XmlElement float amount;
+	protected @XmlElement String memo;
+	protected @XmlElement String response;
 	protected Date transactedDatetime;
 	protected Date createdDatetime;
-	
-	public String getId() {
+
+    public Transaction() {
+    }
+
+    public String getId() {
 		return id;
 	}
 

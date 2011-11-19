@@ -37,18 +37,27 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Customer implements Serializable {
-	protected String id;
-	protected String code;
-	protected String firstName;
-	protected String lastName;
-	protected String company;
-	protected String email;
-	protected String gatewayToken;
+    
+    protected @XmlAttribute String id;
+	protected @XmlAttribute String code;
+	protected @XmlElement String firstName;
+	protected @XmlElement String lastName;
+	protected @XmlElement String company;
+	protected @XmlElement String email;
+	protected @XmlElement String gatewayToken;
 	protected Date createdDatetime;
 	protected Date modifiedDatetime;
+
+    @XmlElement
 	protected List<Subscription> subscriptions = new ArrayList<Subscription>();
-	
+
 	public String getId() {
 		return id;
 	}
@@ -57,22 +66,27 @@ public class Customer implements Serializable {
 		return code;
 	}
 
+    
 	public String getFirstName() {
 		return firstName;
 	}
 
+    
 	public String getLastName() {
 		return lastName;
 	}
 
+    
 	public String getCompany() {
 		return company;
 	}
 
+    
 	public String getEmail() {
 		return email;
 	}
 
+    
 	public String getGatewayToken() {
 		return gatewayToken;
 	}
@@ -89,7 +103,10 @@ public class Customer implements Serializable {
 		return subscriptions;
 	}
 
-	public Customer(Element elem){
+    public Customer() {
+    }
+
+    public Customer(Element elem){
 		this.id = elem.getAttribute("id");
 		this.code = elem.getAttribute("code");
 		this.firstName = XmlUtils.getNamedElemValue(elem, "firstName");
