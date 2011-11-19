@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.rusticsoftware.cheddargetter</groupId>
     <artifactId>client</artifactId>
     <version>0.1-SNAPSHOT</version>
 
-	<name>CheddarGetter Client</name>
-	<packaging>jar</packaging>
+    <name>CheddarGetter Client</name>
+    <packaging>jar</packaging>
 
-	<dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>1.3.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+               </executions>
+               <configuration>
+                    <packageName>com.rusticsoftware.cheddargetter.model</packageName> <!-- The name of your generated source package -->
+               </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -28,6 +50,16 @@
             <version>5.13.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.0.3</version>
+        </dependency>
     </dependencies>
 
 </project>

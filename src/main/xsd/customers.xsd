@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<xs:schema id="customers" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="customers">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="customer" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="firstName" type="xs:string" minOccurs="0" />
+              <xs:element name="lastName" type="xs:string" minOccurs="0" />
+              <xs:element name="company" type="xs:string" minOccurs="0" />
+              <xs:element name="email" type="xs:string" minOccurs="0" />
+              <xs:element name="notes" type="xs:string" minOccurs="0" />
+              <xs:element name="gatewayToken" type="xs:string" minOccurs="0" />
+              <xs:element name="isVatExempt" type="xs:string" minOccurs="0" />
+              <xs:element name="vatNumber" type="xs:string" minOccurs="0" />
+              <xs:element name="firstContactDatetime" type="xs:string" minOccurs="0" />
+              <xs:element name="referer" type="xs:string" minOccurs="0" />
+              <xs:element name="refererHost" type="xs:string" minOccurs="0" />
+              <xs:element name="campaignSource" type="xs:string" minOccurs="0" />
+              <xs:element name="campaignMedium" type="xs:string" minOccurs="0" />
+              <xs:element name="campaignTerm" type="xs:string" minOccurs="0" />
+              <xs:element name="campaignContent" type="xs:string" minOccurs="0" />
+              <xs:element name="campaignName" type="xs:string" minOccurs="0" />
+              <xs:element name="metaData" type="xs:string" minOccurs="0" />
+              <xs:element name="createdDatetime" type="xs:string" minOccurs="0" />
+              <xs:element name="modifiedDatetime" type="xs:string" minOccurs="0" />
+              <xs:element name="subscriptions" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="subscription" minOccurs="1" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="gatewayToken" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccFirstName" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccLastName" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccCompany" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccCountry" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccAddress" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccCity" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccState" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccZip" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccType" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccLastFour" type="xs:string" minOccurs="0" />
+                          <xs:element name="ccExpirationDate" type="xs:string" minOccurs="0" />
+                          <xs:element name="canceledDatetime" type="xs:string" minOccurs="0" />
+                          <xs:element name="createdDatetime" type="xs:string" minOccurs="0" />
+                          <xs:element name="plans" minOccurs="1" maxOccurs="1">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="plan" minOccurs="1" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="name" type="xs:string" minOccurs="0" />
+                                      <xs:element name="description" type="xs:string" minOccurs="0" />
+                                      <xs:element name="isActive" type="xs:string" minOccurs="0" />
+                                      <xs:element name="isFree" type="xs:string" minOccurs="0" />
+                                      <xs:element name="trialDays" type="xs:string" minOccurs="0" />
+                                      <xs:element name="billingFrequency" type="xs:string" minOccurs="0" />
+                                      <xs:element name="billingFrequencyPer" type="xs:string" minOccurs="0" />
+                                      <xs:element name="billingFrequencyUnit" type="xs:string" minOccurs="0" />
+                                      <xs:element name="billingFrequencyQuantity" type="xs:string" minOccurs="0" />
+                                      <xs:element name="setupChargeCode" type="xs:string" minOccurs="0" />
+                                      <xs:element name="setupChargeAmount" type="xs:string" minOccurs="0" />
+                                      <xs:element name="recurringChargeCode" type="xs:string" minOccurs="0" />
+                                      <xs:element name="recurringChargeAmount" type="xs:string" minOccurs="0" />
+                                      <xs:element name="createdDatetime" type="xs:string" minOccurs="0" />
+                                      <xs:element name="items" minOccurs="1" maxOccurs="1">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+                                              <xs:complexType>
+                                                <xs:sequence>
+                                                  <xs:element name="name" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="quantityIncluded" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="isPeriodic" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="overageAmount" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="createdDatetime" type="xs:string" minOccurs="0" />
+                                                </xs:sequence>
+                                                <xs:attribute name="id" type="xs:string" />
+                                                <xs:attribute name="code" type="xs:string" />
+                                              </xs:complexType>
+                                            </xs:element>
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="id" type="xs:string" />
+                                    <xs:attribute name="code" type="xs:string" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="items" minOccurs="0" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="name" type="xs:string" minOccurs="0" />
+                                      <xs:element name="quantity" type="xs:string" minOccurs="0" />
+                                      <xs:element name="createdDatetime" type="xs:string" minOccurs="0" />
+                                      <xs:element name="modifiedDatetime" type="xs:string" minOccurs="0" />
+                                    </xs:sequence>
+                                    <xs:attribute name="id" type="xs:string" />
+                                    <xs:attribute name="code" type="xs:string" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="invoices" minOccurs="1" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="invoice" minOccurs="1" maxOccurs="unbounded">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="number" type="xs:string" minOccurs="0" />
+                                      <xs:element name="type" type="xs:string" minOccurs="0" />
+                                      <xs:element name="vatRate" type="xs:string" minOccurs="0" />
+                                      <xs:element name="billingDatetime" type="xs:string" minOccurs="0" />
+                                      <xs:element name="paidTransactionId" type="xs:string" minOccurs="0" />
+                                      <xs:element name="createdDatetime" type="xs:string" minOccurs="0" />
+                                      <xs:element name="charges" minOccurs="0" maxOccurs="unbounded">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element name="charge" minOccurs="0" maxOccurs="unbounded">
+                                              <xs:complexType>
+                                                <xs:sequence>
+                                                  <xs:element name="type" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="quantity" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="eachAmount" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="description" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="createdDatetime" type="xs:string" minOccurs="0" />
+                                                </xs:sequence>
+                                                <xs:attribute name="id" type="xs:string" />
+                                                <xs:attribute name="code" type="xs:string" />
+                                              </xs:complexType>
+                                            </xs:element>
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                      <xs:element name="transactions" minOccurs="0" maxOccurs="unbounded">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element name="transaction" minOccurs="0" maxOccurs="unbounded">
+                                              <xs:complexType>
+                                                <xs:sequence>
+                                                  <xs:element name="parentId" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="gatewayToken" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="amount" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="memo" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="response" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="responseReason" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="transactedDatetime" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="createdDatetime" type="xs:string" minOccurs="0" />
+                                                  <xs:element name="gatewayAccount" minOccurs="0" maxOccurs="unbounded">
+                                                    <xs:complexType>
+                                                      <xs:attribute name="id" type="xs:string" />
+                                                    </xs:complexType>
+                                                  </xs:element>
+                                                </xs:sequence>
+                                                <xs:attribute name="id" type="xs:string" />
+                                                <xs:attribute name="code" type="xs:string" />
+                                              </xs:complexType>
+                                            </xs:element>
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="id" type="xs:string" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="id" type="xs:string" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:string" />
+            <xs:attribute name="code" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

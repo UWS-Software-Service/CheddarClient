@@ -42,7 +42,7 @@ public class PaymentServiceTest {
 
         assertEquals(test.getClass(), Customers.class);
         Customers customers = (Customers) test;
-        Customer customer = customers.getCustomer().get(0);
+        Customer customer = customers.getCustomer();
         assertEquals(customer.getClass(), Customer.class);
         assertEquals(customer.getCode(), "test_customer");
     }

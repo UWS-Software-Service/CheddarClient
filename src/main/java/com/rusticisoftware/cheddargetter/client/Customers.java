@@ -8,17 +8,17 @@ import java.util.List;
 @XmlRootElement
 public class Customers {
 
-    private List<Customer> customer;
+    private Customer customer;
 
     public Customers() {
     }
 
     @XmlElement
-    public List<Customer> getCustomer() {
+    public Customer getCustomer() {
         return customer;
     }
 
-    public void setCustomer(List<Customer> customer) {
+    public void setCustomer(Customer customer) {
         this.customer = customer;
     }
 }
