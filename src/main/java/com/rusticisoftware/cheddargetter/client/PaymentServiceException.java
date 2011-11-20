@@ -54,11 +54,16 @@ public class PaymentServiceException extends PaymentException {
 	public void setAuxCode(int auxCode){
 		this.auxCode = auxCode;
 	}
-	
+
+    public PaymentServiceException(Error error) {
+        super(error.getMessage());
+        setCode(error.getCode());
+        setAuxCode(error.getAuxCode());
+    }
 	public PaymentServiceException(int code, int auxCode, String message){
 		super(message);
-		this.setCode(code);
-		this.setAuxCode(auxCode);
+		setCode(code);
+		setAuxCode(auxCode);
 	}
 	
 	public String toString(){

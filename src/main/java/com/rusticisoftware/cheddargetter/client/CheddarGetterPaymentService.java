@@ -28,27 +28,23 @@
 
 package com.rusticisoftware.cheddargetter.client;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import sun.misc.BASE64Encoder;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import static javax.xml.bind.JAXBContext.newInstance;
 
-import org.xml.sax.SAXException;
-import sun.misc.BASE64Encoder;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-public class CheddarGetterPaymentService implements PaymentService {
+public class CheddarGetterPaymentService implements PaymentService, InitializingBean {
 	private static Logger log = Logger.getLogger(CheddarGetterPaymentService.class.toString());
 	
 	private static String CG_SERVICE_ROOT = "https://cheddargetter.com/xml";
@@ -58,6 +54,11 @@ public class CheddarGetterPaymentService implements PaymentService {
 	private String password;
 	private String productCode;
 
+    private JAXBContext context;
+
+    public void afterPropertiesSet() throws Exception {
+        context = newInstance(Customers.class, Plans.class, Error.class);
+    }
 
     public String getServiceRoot() {
         return serviceRoot;
@@ -111,19 +112,17 @@ public class CheddarGetterPaymentService implements PaymentService {
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getCustomer(java.lang.String)
 	 */
 	public Customer getCustomer(String custCode) throws PaymentException {
-		Document doc = null;
 		try {
-			doc = makeServiceCall("/customers/get/productCode/" + getProductCode() + "/code/" + custCode, null);
+			return makeServiceCall("/customers/get/productCode/" + getProductCode() + "/code/" + custCode, null, Customer.class);
 		}
 		catch (PaymentServiceException cge){
 			//If the exception is just that the customer doesn't exist, return null
 			if(cge.getCode() == 404){
 				return null;
-			}
+			} else {
+                throw cge ;
+            }
 		}
-		Element root = doc.getDocumentElement();
-		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
-		return (customer == null) ? null : new Customer(customer);
 	}
 
 	/* (non-Javadoc)
@@ -144,10 +143,10 @@ public class CheddarGetterPaymentService implements PaymentService {
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getAllCustomers()
 	 */
-	public Document getAllCustomers() throws PaymentException {
+	public Customers getAllCustomers() throws PaymentException {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("subscriptionStatus", "activeOnly");
-		return makeServiceCall("/customers/get/productCode/" + getProductCode(), params);
+		return makeServiceCall("/customers/get/productCode/" + getProductCode(), params, Customers.class);
 	}
 
 	/* (non-Javadoc)
@@ -184,10 +183,8 @@ public class CheddarGetterPaymentService implements PaymentService {
 			}
 		}
 
-		Document doc = makeServiceCall("/customers/new/productCode/" + getProductCode(), paramMap);
-		Element root = doc.getDocumentElement();
-		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
-		return new Customer(customer);
+		Customers customers = makeServiceCall("/customers/new/productCode/" + getProductCode(), paramMap, Customers.class);
+		return customers.getCustomers().get(0);
 	}
 
 	public Customer updateCustomerAndSubscription(String custCode, String firstName, String lastName,
@@ -220,10 +217,8 @@ public class CheddarGetterPaymentService implements PaymentService {
 			}
 		}
 
-		Document doc = makeServiceCall("/customers/edit/productCode/" + getProductCode() + "/code/" + custCode, paramMap);
-		Element root = doc.getDocumentElement();
-		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
-		return new Customer(customer);
+		Customers customers = makeServiceCall("/customers/edit/productCode/" + getProductCode() + "/code/" + custCode, paramMap, Customers.class);
+		return customers.getCustomers().get(0);
 	}
 
 	public Customer updateCustomer(String custCode, String firstName, String lastName,
@@ -235,17 +230,15 @@ public class CheddarGetterPaymentService implements PaymentService {
 		if(company != null){
 			paramMap.put("company", company);
 		}
-		Document doc = makeServiceCall("/customers/edit-customer/productCode/" + getProductCode() + "/code/" + custCode, paramMap);
-		Element root = doc.getDocumentElement();
-		Element customer = XmlUtils.getFirstChildByTagName(root, "customer");
-		return new Customer(customer);
+		Customers customers = makeServiceCall("/customers/edit-customer/productCode/" + getProductCode() + "/code/" + custCode, paramMap, Customers.class);
+		return customers.getCustomers().get(0);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#updateSubscription(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public Document updateSubscription(String customerCode, String planCode, String ccFirstName, String ccLastName,
-			String ccNumber, String ccExpireMonth, String ccExpireYear, String ccCardCode, String ccZip) throws PaymentException {
+	public Customer updateSubscription(String customerCode, String planCode, String ccFirstName, String ccLastName,
+                                       String ccNumber, String ccExpireMonth, String ccExpireYear, String ccCardCode, String ccZip) throws PaymentException {
 
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("planCode", planCode);
@@ -266,33 +259,33 @@ public class CheddarGetterPaymentService implements PaymentService {
 		}
 
 		String relativeUrl = "/customers/edit-subscription/productCode/" + getProductCode() + "/code/" + customerCode;
-		return makeServiceCall(relativeUrl, paramMap);
+		return makeServiceCall(relativeUrl, paramMap, Customer.class);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#cancelSubscription(java.lang.String)
 	 */
-	public Document cancelSubscription(String customerCode) throws PaymentException {
-		return makeServiceCall("/customers/cancel/productCode/" + getProductCode() + "/code/" + customerCode, null);
+	public Customer cancelSubscription(String customerCode) throws PaymentException {
+		return makeServiceCall("/customers/cancel/productCode/" + getProductCode() + "/code/" + customerCode, null, Customer.class);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#addItemQuantity(java.lang.String, java.lang.String)
 	 */
-	public Document addItemQuantity(String customerCode, String itemCode) throws PaymentException {
+	public Customer addItemQuantity(String customerCode, String itemCode) throws PaymentException {
 	    return addItemQuantity(customerCode, itemCode, 1);
 	}
 
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#addItemQuantity(java.lang.String, java.lang.String, int)
 	 */
-	public Document addItemQuantity(String customerCode, String itemCode, int quantity) throws PaymentException {
+	public Customer addItemQuantity(String customerCode, String itemCode, int quantity) throws PaymentException {
 	    HashMap<String, String> paramMap = new HashMap<String, String>();
 	    paramMap.put("quantity", String.valueOf(quantity));
 
 	    String relativeUrl = "/customers/add-item-quantity/productCode/" + getProductCode() +
 	                         "/code/" + customerCode + "/itemCode/" + itemCode;
-	    return makeServiceCall(relativeUrl, paramMap);
+	    return makeServiceCall(relativeUrl, paramMap, Customer.class);
 
 	}
 
@@ -356,37 +349,24 @@ public class CheddarGetterPaymentService implements PaymentService {
 	    throw new PaymentException("Couldn't find item with code " + itemCode);
 	}
 
-	public Document makeServiceCall(String path, Map<String,String> paramMap) throws PaymentException {
+	public <T> T makeServiceCall(String path, Map<String, String> paramMap, Class<T> clazz) throws PaymentException {
 		String fullPath = CG_SERVICE_ROOT + path;
 		String encodedParams = encodeParamMap(paramMap);
-		String response = postTo(fullPath, getUserName(), getPassword(), encodedParams);
-        Document document = null;
+		InputStream responseStream = postTo(fullPath, getUserName(), getPassword(), encodedParams);
         try {
-            document = XmlUtils.parseXmlString(response);
-            log.log(Level.FINE, "Response from CG: " + XmlUtils.getXmlString(document));
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Unable to create XML parser", e);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to read from response", e);
-        } catch (SAXException e) {
-            throw new PaymentException("Unable to parse XML response.", e);
+            Object response = context.createUnmarshaller().unmarshal(responseStream);
+            if (response instanceof Error)
+                throw new PaymentServiceException((Error) response);
+            if (response.getClass().equals(clazz))
+                return (T) response;
+            else
+                throw new PaymentException("Unexpected return content.");
+        } catch (JAXBException e) {
+            throw new PaymentException("Unable to create XML response unmarshaller", e);
         }
-		try {
-			checkResponseForError(document);
-		} catch (PaymentServiceException cge) {
-			//Let's not log 404s when looking for a customer, since we may
-			//often be looking for a customer just to see if they exist, and this
-			//ends up polluting the logs a lot...
-			boolean missingCustomer = path.startsWith("/customers") && cge.getCode() == 404;
-			if(!missingCustomer){
-				log.log(Level.WARNING, "Error calling service at " + path, cge);
-				throw cge;
-			}
-		}
-		return document;
 	}
 
-	protected String postTo(String urlStr, String userName, String password, String data) throws PaymentException {
+	protected InputStream postTo(String urlStr, String userName, String password, String data) throws PaymentException {
 
 		log.fine("Sending this data to this url: " + urlStr + " data = " + data);
 
@@ -413,23 +393,11 @@ public class CheddarGetterPaymentService implements PaymentService {
             output.flush();
             output.close();
 
-            //Get response
-            BufferedReader rd;
             try {
-                rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                return connection.getInputStream();
             } catch (IOException ioe) {
-                rd = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                return connection.getErrorStream();
             }
-
-            StringBuilder response = new StringBuilder();
-            String responseLine = null;
-            while((responseLine = rd.readLine()) != null){
-                response.append(responseLine);
-            }
-
-            log.fine("Got this back from CG: " + response.toString());
-
-            return response.toString();
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Provided service URL not correct.", e);
         } catch (ProtocolException e) {

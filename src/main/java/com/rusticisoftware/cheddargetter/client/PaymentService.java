@@ -38,7 +38,7 @@ public interface PaymentService {
 
 	boolean customerExists(String custCode);
 
-	Document getAllCustomers() throws Exception;
+	Customers getAllCustomers() throws Exception;
 
 	Customer createNewCustomer(String custCode,
 			String firstName, String lastName, String email, String company,
@@ -54,19 +54,19 @@ public interface PaymentService {
 	public Customer updateCustomer(String custCode, String firstName, String lastName,
 			String email, String company) throws Exception;
 
-	Document updateSubscription(String customerCode,
-			String planCode, String ccFirstName, String ccLastName,
-			String ccNumber, String ccExpireMonth, String ccExpireYear,
-			String ccCardCode, String ccZip) throws Exception;
+	Customer updateSubscription(String customerCode,
+                                String planCode, String ccFirstName, String ccLastName,
+                                String ccNumber, String ccExpireMonth, String ccExpireYear,
+                                String ccCardCode, String ccZip) throws Exception;
 
-	Document cancelSubscription(String customerCode)
+	Customer cancelSubscription(String customerCode)
 			throws Exception;
 
-	Document addItemQuantity(String customerCode,
-			String itemCode) throws Exception;
+	Customer addItemQuantity(String customerCode,
+                             String itemCode) throws Exception;
 
-	Document addItemQuantity(String customerCode,
-			String itemCode, int quantity) throws Exception;
+	Customer addItemQuantity(String customerCode,
+                             String itemCode, int quantity) throws Exception;
 
 	CreditCardData getLatestCreditCardData(String customerCode)
 			throws Exception;
@@ -76,7 +76,5 @@ public interface PaymentService {
 
 	int getCurrentItemUsage(String customerCode, String itemCode)
 			throws Exception;
-	
-	public Document makeServiceCall(String path, Map<String,String> paramMap) throws Exception;
 
 }

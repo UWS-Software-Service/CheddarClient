@@ -8,9 +8,9 @@ public class Error {
 
     private @XmlAttribute String id;
 
-    private @XmlAttribute String code;
+    private @XmlAttribute int code;
 
-    private @XmlAttribute String auxCode;
+    private @XmlAttribute int auxCode;
 
     private @XmlValue String message;
 
@@ -25,19 +25,19 @@ public class Error {
         this.id = id;
     }
 
-    public String getCode() {
+    public int getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(int code) {
         this.code = code;
     }
 
-    public String getAuxCode() {
+    public int getAuxCode() {
         return auxCode;
     }
 
-    public void setAuxCode(String auxCode) {
+    public void setAuxCode(int auxCode) {
         this.auxCode = auxCode;
     }
 
