@@ -38,6 +38,7 @@ import java.util.List;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement
 public class Customer implements Serializable {
@@ -49,8 +50,8 @@ public class Customer implements Serializable {
 	protected @XmlElement String company;
 	protected @XmlElement String email;
 	protected @XmlElement String gatewayToken;
-	protected Date createdDatetime;
-	protected Date modifiedDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date modifiedDatetime;
 
     @XmlElementWrapper(name = "subscriptions")
     @XmlElement(name = "subscription")
@@ -104,31 +105,4 @@ public class Customer implements Serializable {
     public Customer() {
     }
 
-    public Customer(Element elem){
-		this.id = elem.getAttribute("id");
-		this.code = elem.getAttribute("code");
-		this.firstName = XmlUtils.getNamedElemValue(elem, "firstName");
-		this.lastName = XmlUtils.getNamedElemValue(elem, "lastName");
-		this.company = XmlUtils.getNamedElemValue(elem, "company");
-		this.email = XmlUtils.getNamedElemValue(elem, "email");
-		this.gatewayToken = XmlUtils.getNamedElemValue(elem, "gatewayToken");
-		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-		this.modifiedDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "modifiedDatetime"));
-		
-		Element subsParent = XmlUtils.getFirstChildByTagName(elem, "subscriptions");
-		if(subsParent != null){
-			List<Element> subsList = XmlUtils.getChildrenByTagName(subsParent, "subscription");
-			for(Element sub : subsList){
-				this.subscriptions.add(new Subscription(sub));
-			}
-			
-			//Sort subscriptions by create date (most recent first)
-			Collections.sort(this.subscriptions, 
-				new Comparator<Subscription>() {
-					public int compare(Subscription sub1, Subscription sub2) {
-						return sub2.getCreatedDatetime().compareTo(sub1.getCreatedDatetime());
-					}
-				});
-		}
-	}
 }

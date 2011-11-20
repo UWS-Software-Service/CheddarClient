@@ -35,6 +35,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement
 public class Item {
@@ -45,8 +46,8 @@ public class Item {
 	protected @XmlElement int quantityIncluded;
 	protected @XmlElement boolean isPeriodic;
 	protected @XmlElement float overageAmount;
-	protected Date createdDatetime;
-	protected Date modifiedDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date modifiedDatetime;
 
     public Item() {
     }
@@ -87,15 +88,4 @@ public class Item {
 		return modifiedDatetime;
 	}
 
-	public Item(Element elem){
-		this.id = elem.getAttribute("id");
-		this.code = elem.getAttribute("code");
-		this.name = XmlUtils.getNamedElemValue(elem, "name");
-		this.quantity = (Integer)XmlUtils.getNamedElemValue(elem, "quantity", Integer.class, 0);
-		this.quantityIncluded = (Integer)XmlUtils.getNamedElemValue(elem, "quantityIncluded", Integer.class, 0);
-		this.isPeriodic = (Boolean)XmlUtils.getNamedElemValue(elem, "isPeriodic", Boolean.class, false);
-		this.overageAmount = (Float)XmlUtils.getNamedElemValue(elem, "overageAmount", Float.class, 0.0f);
-		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-		this.modifiedDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "modifiedDatetime"));
-	}
 }

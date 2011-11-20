@@ -428,59 +428,7 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
             throw new IllegalStateException("UTF-8 encoding not found.", e);
         }
     }
-	
-	protected boolean checkResponseForError(Document doc) throws PaymentException {
-		Element root = doc.getDocumentElement();
-		if(root.getNodeName().equals("error")){
-			throw getExceptionFromElement(root);
-		}
-		else if (root.getNodeName().equals("customers")){
-			Element errorsElem = XmlUtils.getFirstChildByTagName(root, "errors");
-			if(errorsElem != null){
-				Element errorElem = XmlUtils.getFirstChildByTagName(errorsElem, "error");
-				if(errorElem != null){
-					throw getExceptionFromElement(errorElem);
-				}
-			}
-		}
-		return true;
-	}
-	
-	protected PaymentServiceException getExceptionFromElement(Element errorElem){
-		String code = errorElem.getAttribute("code");
-		String auxCode = errorElem.getAttribute("auxCode");
-		if(auxCode == null || auxCode.length() == 0){
-			auxCode = "0";
-		}
-		String message = errorElem.getTextContent();
-		return new PaymentServiceException(Integer.parseInt(code), Integer.parseInt(auxCode), message);
-	}
-	
-	public static Date parseCgDate(String cgDate) {
-		if(cgDate == null || cgDate.length() == 0){
-			return null;
-		}
-		
-		try{
-	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-		    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-			return sdf.parse(fixDateFormat(cgDate));
-		}
-		catch (Exception e){
-			log.log(Level.WARNING, "Exception parsing date " + cgDate, e);
-			return null;
-		}
-    }
-	
-	public static String fixDateFormat(String cgDate){
-    	//CG's dates have annoying ':' symbol in middle of timezone part
-    	//So here we take it out
-    	int tzIndex = cgDate.lastIndexOf("+");
-    	String tz = cgDate.substring(tzIndex, cgDate.length());
-    	String modifiedTz = tz.replace(":", "");
-    	return cgDate.substring(0, tzIndex) + modifiedTz;
-	}
-	
+
 	private static String stripCcNumber(String ccNumber) {
 		return (ccNumber == null) ? null : ccNumber.replace(" ", "").replace("-", "");
 	}

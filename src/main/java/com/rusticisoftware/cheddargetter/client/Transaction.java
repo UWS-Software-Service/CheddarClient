@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement
 public class Transaction implements Serializable {
@@ -46,8 +47,8 @@ public class Transaction implements Serializable {
 	protected @XmlElement float amount;
 	protected @XmlElement String memo;
 	protected @XmlElement String response;
-	protected Date transactedDatetime;
-	protected Date createdDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date transactedDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
 
     public Transaction() {
     }
@@ -82,17 +83,6 @@ public class Transaction implements Serializable {
 
 	public Date getCreatedDatetime() {
 		return createdDatetime;
-	}
-
-	public Transaction(Element elem) {
-		this.id = elem.getAttribute("id");
-		this.code = elem.getAttribute("code");
-		this.parentId = XmlUtils.getNamedElemValue(elem, "parentId");
-		this.amount = (Float)XmlUtils.getNamedElemValue(elem, "amount", Float.class, 0.0f);
-		this.memo = XmlUtils.getNamedElemValue(elem, "memo");
-		this.response = XmlUtils.getNamedElemValue(elem, "response");
-		this.transactedDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "transactedDatetime"));
-		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
 	}
 	
 }

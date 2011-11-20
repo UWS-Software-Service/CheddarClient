@@ -39,14 +39,15 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement
 public class Invoice implements Serializable {
 	protected @XmlAttribute String id;
 	protected @XmlElement String number;
 	protected @XmlElement String type;
-	protected Date billingDatetime;
-	protected Date createdDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date billingDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
 	protected @XmlElement(name = "transaction") @XmlElementWrapper List<Transaction> transactions = new ArrayList<Transaction>();
 	protected @XmlElement(name = "charge") @XmlElementWrapper List<Charge> charges = new ArrayList<Charge>();
 
@@ -89,27 +90,4 @@ public class Invoice implements Serializable {
 		return sum;
 	}
 
-	public Invoice(Element elem){
-		this.id = elem.getAttribute("id");
-		this.number = XmlUtils.getNamedElemValue(elem, "number");
-		this.type = XmlUtils.getNamedElemValue(elem, "type");
-		this.billingDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "billingDatetime"));
-		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-		
-		Element transactionsParent = XmlUtils.getFirstChildByTagName(elem, "transactions");
-		if(transactionsParent != null){
-			List<Element> transactionsList = XmlUtils.getChildrenByTagName(transactionsParent, "transaction");
-			for(Element transaction : transactionsList){
-				this.transactions.add(new Transaction(transaction));
-			}
-		}
-		
-		Element chargesParent = XmlUtils.getFirstChildByTagName(elem, "charges");
-		if(chargesParent != null){
-			List<Element> chargesList = XmlUtils.getChildrenByTagName(chargesParent, "charge");
-			for(Element charge : chargesList){
-				this.charges.add(new Charge(charge));
-			}
-		}
-	}
 }

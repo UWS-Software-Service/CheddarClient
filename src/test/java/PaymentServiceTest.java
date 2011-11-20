@@ -3,7 +3,6 @@ import com.rusticisoftware.cheddargetter.client.Error;
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static com.rusticisoftware.cheddargetter.client.XmlUtils.getFirstChildByTagName;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.testng.Assert.assertEquals;
 
@@ -30,15 +28,6 @@ public class PaymentServiceTest {
     @BeforeTest
     public void setupJaxbContext() throws JAXBException {
         context = newInstance(Customers.class, Plans.class, Error.class);
-    }
-
-    @Test
-    public void testCustomerFromXmlDOM() throws IOException, SAXException, ParserConfigurationException {
-        Document document = XmlUtils.parseXmlString(streamString(CUSTOMER_XML));
-        Customer customer = new Customer(
-                getFirstChildByTagName(document.getDocumentElement(), "customer")
-        );
-        assertEquals("test_customer", customer.getCode());
     }
 
     @Test

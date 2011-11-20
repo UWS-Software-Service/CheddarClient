@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement
 public class Charge implements Serializable {
@@ -45,7 +46,7 @@ public class Charge implements Serializable {
 	protected @XmlElement float quantity;
 	protected @XmlElement float eachAmount;
 	protected @XmlElement String description;
-	protected Date createdDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
 
     public Charge() {
     }
@@ -78,13 +79,4 @@ public class Charge implements Serializable {
 		return createdDatetime;
 	}
 
-	public Charge(Element elem){
-		this.id = elem.getAttribute("id");
-		this.code = elem.getAttribute("code");
-		this.type = XmlUtils.getNamedElemValue(elem, "type");
-		this.quantity = (Float)XmlUtils.getNamedElemValue(elem, "quantity", Float.class, 0);
-		this.eachAmount = (Float)XmlUtils.getNamedElemValue(elem, "eachAmount", Float.class, 0.0f);
-		this.description = XmlUtils.getNamedElemValue(elem, "description");
-		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-	}
 }

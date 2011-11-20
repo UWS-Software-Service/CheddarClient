@@ -38,6 +38,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement
 public class Plan {
@@ -56,7 +57,7 @@ public class Plan {
 	protected @XmlElement float setupChargeAmount;
 	protected @XmlElement String recurringChargeCode;
 	protected @XmlElement float recurringChargeAmount;
-	protected Date createdDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
 	protected @XmlElement(name = "item") @XmlElementWrapper List<Item> items = new ArrayList<Item>();
 
     public Plan() {
@@ -126,30 +127,4 @@ public class Plan {
 		return items;
 	}
 
-	public Plan(Element elem){
-		this.code = elem.getAttribute("code");
-		this.id = elem.getAttribute("id");
-		this.name = XmlUtils.getNamedElemValue(elem, "name");
-		this.description = XmlUtils.getNamedElemValue(elem, "description");
-		this.isActive = (Boolean)XmlUtils.getNamedElemValue(elem, "isActive", Boolean.class, false);
-		this.trialDays = (Integer)XmlUtils.getNamedElemValue(elem, "trialDays", Integer.class, 0);
-		this.billingFrequency = XmlUtils.getNamedElemValue(elem, "billingFrequency");
-		this.billingFrequencyPer = XmlUtils.getNamedElemValue(elem, "billingFrequency");
-		this.billingFrequencyUnit = XmlUtils.getNamedElemValue(elem, "billingFrequencyUnit");
-		this.billingFrequencyQuantity = (Integer)XmlUtils.getNamedElemValue(elem, "billingFrequencyQuantity", Integer.class, 0);
-		this.setupChargeCode = XmlUtils.getNamedElemValue(elem, "setupChargeCode");
-		this.setupChargeAmount = (Float)XmlUtils.getNamedElemValue(elem, "setupChargeAmount", Float.class, 0.0f);
-		this.recurringChargeCode = XmlUtils.getNamedElemValue(elem, "recurringChargeCode");
-		this.recurringChargeAmount = (Float)XmlUtils.getNamedElemValue(elem, "recurringChargeAmount", Float.class, 0.0f);
-		this.createdDatetime = CheddarGetterPaymentService.parseCgDate(XmlUtils.getNamedElemValue(elem, "createdDatetime"));
-		
-		Element itemsParent = XmlUtils.getFirstChildByTagName(elem, "items");
-		if(itemsParent != null){
-			this.items = new ArrayList<Item>();
-			List<Element> itemList = XmlUtils.getChildrenByTagName(itemsParent, "item");
-			for(Element item : itemList){
-				this.items.add(new Item(item));
-			}
-		}
-	}
 }
