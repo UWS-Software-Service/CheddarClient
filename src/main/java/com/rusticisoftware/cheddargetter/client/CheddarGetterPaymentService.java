@@ -52,57 +52,61 @@ public class CheddarGetterPaymentService implements PaymentService {
 	private static Logger log = Logger.getLogger(CheddarGetterPaymentService.class.toString());
 	
 	private static String CG_SERVICE_ROOT = "https://cheddargetter.com/xml";
-	
+
+    private String serviceRoot = CG_SERVICE_ROOT;
 	private String userName;
 	private String password;
 	private String productCode;
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getUserName()
-	 */
+
+    public String getServiceRoot() {
+        return serviceRoot;
+    }
+
+    public void setServiceRoot(String serviceRoot) {
+        this.serviceRoot = serviceRoot;
+    }
+
 	public String getUserName(){
 		return userName;
 	}
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#setUserName(java.lang.String)
-	 */
+
 	public void setUserName(String userName){
 		this.userName = userName;
 	}
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getPassword()
-	 */
+
 	public String getPassword(){
 		return password;
 	}
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#setPassword(java.lang.String)
-	 */
+
 	public void setPassword(String password){
 		this.password = password;
 	}
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getProductCode()
-	 */
+
 	public String getProductCode(){
 		return productCode;
 	}
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#setProductCode(java.lang.String)
-	 */
+
 	public void setProductCode(String productCode){
 		this.productCode = productCode;
 	}
 	
 	public CheddarGetterPaymentService(){
 	}
-	
-	public CheddarGetterPaymentService(String userName, String password, String productCode){
+
+    public CheddarGetterPaymentService(String userName, String password, String productCode){
 		setUserName(userName);
 		setPassword(password);
 		setProductCode(productCode);
 	}
-	
+
+    public CheddarGetterPaymentService(String serviceRoot, String userName, String password, String productCode) {
+        setServiceRoot(serviceRoot);
+        setUserName(userName);
+        setPassword(password);
+        setProductCode(productCode);
+    }
+
 	/* (non-Javadoc)
 	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getCustomer(java.lang.String)
 	 */

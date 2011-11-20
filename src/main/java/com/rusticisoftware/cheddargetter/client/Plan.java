@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -56,7 +57,7 @@ public class Plan {
 	protected @XmlElement String recurringChargeCode;
 	protected @XmlElement float recurringChargeAmount;
 	protected Date createdDatetime;
-	protected @XmlElement List<Item> items = new ArrayList<Item>();
+	protected @XmlElement(name = "item") @XmlElementWrapper List<Item> items = new ArrayList<Item>();
 
     public Plan() {
     }

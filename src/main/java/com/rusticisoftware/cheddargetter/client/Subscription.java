@@ -51,9 +51,10 @@ public class Subscription {
 	protected Date canceledDatetime;
 	protected Date createdDatetime;
 
-	protected @XmlElement List<Plan> plans = new ArrayList<Plan>();
-	protected @XmlElement List<Item> items = new ArrayList<Item>();
-	protected @XmlElement List<Invoice> invoices = new ArrayList<Invoice>();
+
+	protected @XmlElement(name = "plan") @XmlElementWrapper List<Plan> plans = new ArrayList<Plan>();
+	protected @XmlElement(name = "item") @XmlElementWrapper List<Item> items = new ArrayList<Item>();
+	protected @XmlElement(name = "invoice") @XmlElementWrapper List<Invoice> invoices = new ArrayList<Invoice>();
 
     public Subscription() {
     }

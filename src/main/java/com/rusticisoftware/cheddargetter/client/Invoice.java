@@ -37,6 +37,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -46,8 +47,8 @@ public class Invoice implements Serializable {
 	protected @XmlElement String type;
 	protected Date billingDatetime;
 	protected Date createdDatetime;
-	protected @XmlElement List<Transaction> transactions = new ArrayList<Transaction>();
-	protected @XmlElement List<Charge> charges = new ArrayList<Charge>();
+	protected @XmlElement(name = "transaction") @XmlElementWrapper List<Transaction> transactions = new ArrayList<Transaction>();
+	protected @XmlElement(name = "charge") @XmlElementWrapper List<Charge> charges = new ArrayList<Charge>();
 
     public Invoice() {
     }

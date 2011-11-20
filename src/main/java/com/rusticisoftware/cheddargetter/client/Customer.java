@@ -52,7 +52,8 @@ public class Customer implements Serializable {
 	protected Date createdDatetime;
 	protected Date modifiedDatetime;
 
-    @XmlElement
+    @XmlElementWrapper(name = "subscriptions")
+    @XmlElement(name = "subscription")
 	protected List<Subscription> subscriptions = new ArrayList<Subscription>();
 
 	public String getId() {
