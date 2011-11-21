@@ -26,86 +26,68 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
 
+import com.cheddargetter.client.service.CGDateAdapter;
+
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import org.w3c.dom.Element;
-
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-@XmlType
-public class Subscription {
-
+@XmlRootElement
+public class Invoice implements Serializable {
 	protected @XmlAttribute String id;
-	protected @XmlElement String gatewayToken;
-	protected @XmlElement String ccFirstName;
-	protected @XmlElement String ccLastName;
-	protected @XmlElement String ccType;
-	protected @XmlElement String ccLastFour;
-	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date ccExpirationDate;
-	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date canceledDatetime;
-	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+	protected @XmlElement String number;
+	protected @XmlElement String type;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date billingDatetime;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+	protected @XmlElement(name = "transaction") @XmlElementWrapper List<Transaction> transactions = new ArrayList<Transaction>();
+	protected @XmlElement(name = "charge") @XmlElementWrapper List<Charge> charges = new ArrayList<Charge>();
 
-
-	protected @XmlElement(name = "plan") @XmlElementWrapper List<Plan> plans = new ArrayList<Plan>();
-	protected @XmlElement(name = "item") @XmlElementWrapper List<Item> items = new ArrayList<Item>();
-	protected @XmlElement(name = "invoice") @XmlElementWrapper List<Invoice> invoices = new ArrayList<Invoice>();
-
-    public Subscription() {
+    public Invoice() {
     }
 
     public String getId() {
 		return id;
 	}
 
-	public String getGatewayToken() {
-		return gatewayToken;
-	}
-	
-	public String getCcFirstName() {
-		return ccFirstName;
-	}
-	
-	public String getCcLastName() {
-		return ccLastName;
+	public String getNumber() {
+		return number;
 	}
 
-	public String getCcType() {
-		return ccType;
+	public String getType() {
+		return type;
 	}
 
-	public String getCcLastFour() {
-		return ccLastFour;
-	}
-
-	public Date getCcExpirationDate() {
-		return ccExpirationDate;
-	}
-
-	public Date getCanceledDatetime() {
-		return canceledDatetime;
+	public Date getBillingDatetime() {
+		return billingDatetime;
 	}
 
 	public Date getCreatedDatetime() {
 		return createdDatetime;
 	}
-
-	public List<Plan> getPlans() {
-		return plans;
+	
+	public List<Transaction> getTransactions(){
+		return transactions;
 	}
-
-	public List<Item> getItems() {
-		return items;
+	
+	public List<Charge> getCharges() {
+		return charges;
 	}
-
-	public List<Invoice> getInvoices() {
-		return invoices;
+	
+	public double getTotalAmount(){
+		double sum = 0.0d;
+		for(Charge charge : charges){
+			sum += charge.getEachAmount() * charge.getQuantity();
+		}
+		return sum;
 	}
 
 }

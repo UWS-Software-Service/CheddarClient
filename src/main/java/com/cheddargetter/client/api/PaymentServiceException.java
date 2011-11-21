@@ -26,66 +26,55 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
 
-import java.util.Date;
+import java.lang.*;
 
-import org.w3c.dom.Element;
-
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-@XmlRootElement
-public class Item {
-	protected @XmlAttribute String id;
-	protected @XmlAttribute String code;
-	protected @XmlElement String name;
-	protected @XmlElement int quantity;
-	protected @XmlElement int quantityIncluded;
-	protected @XmlElement boolean isPeriodic;
-	protected @XmlElement float overageAmount;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date modifiedDatetime;
-
-    public Item() {
-    }
-
-    public String getId() {
-		return id;
-	}
-
-	public String getCode() {
+public class PaymentServiceException extends PaymentException {
+	public static final int REQUEST_INVALID = 400;
+	public static final int NOT_AUTHORIZED = 401;
+	public static final int NOT_FOUND = 404;
+	public static final int PRECONDITION_FAILED = 412;
+	public static final int DATA_INVALID = 500;
+	public static final int USAGE_INVALID = 500;
+	public static final int UNKNOWN = 500;
+	public static final int BAD_GATEWAY = 512;
+	
+	private int code = UNKNOWN;
+	private int auxCode = 0;
+	
+	public int getCode(){
 		return code;
 	}
-
-	public String getName() {
-		return name;
+	public void setCode(int code){
+		this.code = code;
+	}
+	
+	public int getAuxCode(){
+		return auxCode;
+	}
+	public void setAuxCode(int auxCode){
+		this.auxCode = auxCode;
 	}
 
-	public int getQuantity() {
-		return quantity;
+    public PaymentServiceException(Error error) {
+        super(error.getMessage());
+        setCode(error.getCode());
+        setAuxCode(error.getAuxCode());
+    }
+	public PaymentServiceException(int code, int auxCode, String message){
+		super(message);
+		setCode(code);
+		setAuxCode(auxCode);
 	}
-
-	public int getQuantityIncluded() {
-		return quantityIncluded;
+	
+	public String toString(){
+		return "PaymentServiceException: Code = " + getCode() +
+				(auxCode == 0 ? "" : ", AuxCode = " + auxCode) +
+				", Message = " + this.getMessage();
 	}
-
-	public boolean isPeriodic() {
-		return isPeriodic;
+	
+	public boolean isGatewayError(){
+		return (auxCode != 0 && (auxCode < 5000 || auxCode >= 7000));
 	}
-
-	public float getOverageAmount() {
-		return overageAmount;
-	}
-
-	public Date getCreatedDatetime() {
-		return createdDatetime;
-	}
-
-	public Date getModifiedDatetime() {
-		return modifiedDatetime;
-	}
-
 }

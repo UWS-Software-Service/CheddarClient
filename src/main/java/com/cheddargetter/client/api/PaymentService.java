@@ -26,11 +26,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
 
-import org.w3c.dom.Document;
-
-import java.util.Map;
+import java.util.List;
 
 public interface PaymentService {
 
@@ -38,7 +36,7 @@ public interface PaymentService {
 
 	boolean customerExists(String custCode) throws PaymentException;
 
-	Customers getAllCustomers() throws Exception;
+	List<Customer> getAllCustomers() throws Exception;
 
 	Customer createNewCustomer(String custCode,
 			String firstName, String lastName, String email, String company,

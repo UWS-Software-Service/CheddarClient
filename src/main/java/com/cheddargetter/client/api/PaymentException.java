@@ -1,4 +1,4 @@
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
 
 public class PaymentException extends Exception {
 

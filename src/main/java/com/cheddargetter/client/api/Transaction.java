@@ -26,68 +26,63 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
+
+import com.cheddargetter.client.service.CGDateAdapter;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
-import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement
-public class Invoice implements Serializable {
+public class Transaction implements Serializable {
 	protected @XmlAttribute String id;
-	protected @XmlElement String number;
-	protected @XmlElement String type;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date billingDatetime;
+	protected @XmlAttribute String code;
+	protected @XmlElement String parentId;
+	//CGGatewayAccount ?
+	protected @XmlElement float amount;
+	protected @XmlElement String memo;
+	protected @XmlElement String response;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date transactedDatetime;
 	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
-	protected @XmlElement(name = "transaction") @XmlElementWrapper List<Transaction> transactions = new ArrayList<Transaction>();
-	protected @XmlElement(name = "charge") @XmlElementWrapper List<Charge> charges = new ArrayList<Charge>();
 
-    public Invoice() {
+    public Transaction() {
     }
 
     public String getId() {
 		return id;
 	}
 
-	public String getNumber() {
-		return number;
+	public String getCode() {
+		return code;
 	}
 
-	public String getType() {
-		return type;
+	public String getParentId() {
+		return parentId;
 	}
 
-	public Date getBillingDatetime() {
-		return billingDatetime;
+	public float getAmount() {
+		return amount;
+	}
+
+	public String getMemo() {
+		return memo;
+	}
+
+	public String getResponse() {
+		return response;
+	}
+
+	public Date getTransactedDatetime() {
+		return transactedDatetime;
 	}
 
 	public Date getCreatedDatetime() {
 		return createdDatetime;
 	}
 	
-	public List<Transaction> getTransactions(){
-		return transactions;
-	}
-	
-	public List<Charge> getCharges() {
-		return charges;
-	}
-	
-	public double getTotalAmount(){
-		double sum = 0.0d;
-		for(Charge charge : charges){
-			sum += charge.getEachAmount() * charge.getQuantity();
-		}
-		return sum;
-	}
-
 }

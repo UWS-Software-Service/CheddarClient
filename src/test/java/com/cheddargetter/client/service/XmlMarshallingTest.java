@@ -1,5 +1,7 @@
-import com.rusticisoftware.cheddargetter.client.*;
-import com.rusticisoftware.cheddargetter.client.Error;
+package com.cheddargetter.client.service;
+
+import com.cheddargetter.client.api.*;
+import com.cheddargetter.client.api.Error;
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -17,7 +19,7 @@ import static javax.xml.bind.JAXBContext.newInstance;
 import static org.testng.Assert.assertEquals;
 
 @Test
-public class PaymentServiceTest {
+public class XmlMarshallingTest {
 
     public static final String CUSTOMER_XML = "/customer.xml";
     public static final String PLANS_XML = "/plans.xml";
@@ -65,7 +67,7 @@ public class PaymentServiceTest {
         Object test = unmarshaller.unmarshal(stream(ERROR_XML));
 
         assertEquals(test.getClass(), Error.class);
-        Error error = (Error) test ;
+        Error error = (com.cheddargetter.client.api.Error) test ;
         assertEquals(error.getId(), "73542");
         assertEquals(error.getCode(), "404");
         assertEquals(error.getMessage(), "Customer not found");
@@ -82,7 +84,7 @@ public class PaymentServiceTest {
     }
 
     private static InputStream stream(String fileName) {
-        return PaymentServiceTest.class.getResourceAsStream(fileName);
+        return XmlMarshallingTest.class.getResourceAsStream(fileName);
     }
 
 }

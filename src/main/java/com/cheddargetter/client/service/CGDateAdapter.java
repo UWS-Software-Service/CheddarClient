@@ -1,4 +1,4 @@
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.service;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.text.SimpleDateFormat;

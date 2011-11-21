@@ -1,8 +1,6 @@
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 

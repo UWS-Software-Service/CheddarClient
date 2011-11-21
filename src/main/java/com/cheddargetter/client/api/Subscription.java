@@ -26,57 +26,84 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
 
-import java.io.Serializable;
+import com.cheddargetter.client.service.CGDateAdapter;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import org.w3c.dom.Element;
-
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-@XmlRootElement
-public class Charge implements Serializable {
-	protected @XmlAttribute String id;
-	protected @XmlAttribute String code;
-	protected @XmlElement String type;
-	protected @XmlElement float quantity;
-	protected @XmlElement float eachAmount;
-	protected @XmlElement String description;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+@XmlType
+public class Subscription {
 
-    public Charge() {
+	protected @XmlAttribute String id;
+	protected @XmlElement String gatewayToken;
+	protected @XmlElement String ccFirstName;
+	protected @XmlElement String ccLastName;
+	protected @XmlElement String ccType;
+	protected @XmlElement String ccLastFour;
+	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date ccExpirationDate;
+	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date canceledDatetime;
+	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+
+
+	protected @XmlElement(name = "plan") @XmlElementWrapper List<Plan> plans = new ArrayList<Plan>();
+	protected @XmlElement(name = "item") @XmlElementWrapper List<Item> items = new ArrayList<Item>();
+	protected @XmlElement(name = "invoice") @XmlElementWrapper List<Invoice> invoices = new ArrayList<Invoice>();
+
+    public Subscription() {
     }
 
     public String getId() {
 		return id;
 	}
 
-	public String getCode() {
-		return code;
+	public String getGatewayToken() {
+		return gatewayToken;
+	}
+	
+	public String getCcFirstName() {
+		return ccFirstName;
+	}
+	
+	public String getCcLastName() {
+		return ccLastName;
 	}
 
-	public String getType() {
-		return type;
+	public String getCcType() {
+		return ccType;
 	}
 
-	public float getQuantity() {
-		return quantity;
+	public String getCcLastFour() {
+		return ccLastFour;
 	}
 
-	public float getEachAmount() {
-		return eachAmount;
+	public Date getCcExpirationDate() {
+		return ccExpirationDate;
 	}
 
-	public String getDescription() {
-		return description;
+	public Date getCanceledDatetime() {
+		return canceledDatetime;
 	}
 
 	public Date getCreatedDatetime() {
 		return createdDatetime;
+	}
+
+	public List<Plan> getPlans() {
+		return plans;
+	}
+
+	public List<Item> getItems() {
+		return items;
+	}
+
+	public List<Invoice> getInvoices() {
+		return invoices;
 	}
 
 }

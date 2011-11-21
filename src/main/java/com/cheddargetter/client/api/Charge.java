@@ -26,74 +26,57 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
 
-public class CreditCardData {
-	private String firstName;
-	private String lastName;
-	private String type;
-	private String lastFour;
-	private int expireMonth;
-	private int expireYear;
-	
-	public String getFirstName() {
-		return firstName;
+import com.cheddargetter.client.service.CGDateAdapter;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+@XmlRootElement
+public class Charge implements Serializable {
+	protected @XmlAttribute String id;
+	protected @XmlAttribute String code;
+	protected @XmlElement String type;
+	protected @XmlElement float quantity;
+	protected @XmlElement float eachAmount;
+	protected @XmlElement String description;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+
+    public Charge() {
+    }
+
+    public String getId() {
+		return id;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public String getCode() {
+		return code;
 	}
 
 	public String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public float getQuantity() {
+		return quantity;
 	}
 
-	public String getLastFour() {
-		return lastFour;
+	public float getEachAmount() {
+		return eachAmount;
 	}
 
-	public void setLastFour(String lastFour) {
-		this.lastFour = lastFour;
+	public String getDescription() {
+		return description;
 	}
 
-	public int getExpireMonth() {
-		return expireMonth;
+	public Date getCreatedDatetime() {
+		return createdDatetime;
 	}
 
-	public void setExpireMonth(int expireMonth) {
-		this.expireMonth = expireMonth;
-	}
-
-	public int getExpireYear() {
-		return expireYear;
-	}
-
-	public void setExpireYear(int expireYear) {
-		this.expireYear = expireYear;
-	}
-
-	public CreditCardData() {
-		
-	}
-	
-	public CreditCardData(String firstName, String lastName, String type, String lastFour, int expireMonth, int expireYear){
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.type = type;
-		this.lastFour = lastFour;
-		this.expireMonth = expireMonth;
-		this.expireYear = expireYear;
-	}
 }

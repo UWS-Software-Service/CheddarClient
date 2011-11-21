@@ -26,10 +26,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.service;
 
+import com.cheddargetter.client.api.*;
+import com.cheddargetter.client.api.Error;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -46,7 +47,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.InitializingBean;
-import sun.misc.BASE64Encoder;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -55,8 +55,8 @@ import java.net.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static com.rusticisoftware.cheddargetter.client.MapUtils.entry;
-import static com.rusticisoftware.cheddargetter.client.MapUtils.hashMap;
+import static com.cheddargetter.client.util.MapUtils.entry;
+import static com.cheddargetter.client.util.MapUtils.hashMap;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -154,14 +154,14 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         }
 	}
 
-	public Customers getAllCustomers() throws PaymentException {
+	public List<Customer> getAllCustomers() throws PaymentException {
 		return makeServiceCall(
                 Customers.class,
                 "/customers/get/productCode/" + getProductCode(),
                 hashMap(
                         entry("subscriptionStatus", "activeOnly")
                 )
-        );
+        ).getCustomers();
 	}
 
 	public Customer createNewCustomer(String custCode, String firstName, String lastName,
@@ -378,7 +378,7 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
             HttpPost post = new HttpPost(urlStr);
             post.setEntity(createFormEntity(params));
             return httpClient
-                    .execute(post, createHttpContext())
+                    .execute(host, post, createHttpContext())
                     .getEntity()
                     .getContent();
         } catch (MalformedURLException e) {

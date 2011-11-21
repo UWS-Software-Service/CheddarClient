@@ -26,63 +26,105 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.rusticisoftware.cheddargetter.client;
+package com.cheddargetter.client.api;
 
-import java.io.Serializable;
+import com.cheddargetter.client.service.CGDateAdapter;
+
+import java.util.ArrayList;
 import java.util.Date;
-
-import org.w3c.dom.Element;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement
-public class Transaction implements Serializable {
-	protected @XmlAttribute String id;
-	protected @XmlAttribute String code;
-	protected @XmlElement String parentId;
-	//CGGatewayAccount ?
-	protected @XmlElement float amount;
-	protected @XmlElement String memo;
-	protected @XmlElement String response;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date transactedDatetime;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+public class Plan {
 
-    public Transaction() {
+	protected @XmlAttribute String code;
+	protected @XmlAttribute String id;
+	protected @XmlElement String name;
+	protected @XmlElement String description;
+	protected @XmlElement boolean isActive;
+	protected @XmlElement int trialDays;
+	protected @XmlElement String billingFrequency;
+	protected @XmlElement String billingFrequencyPer;
+	protected @XmlElement String billingFrequencyUnit;
+	protected @XmlElement int billingFrequencyQuantity;
+	protected @XmlElement String setupChargeCode;
+	protected @XmlElement float setupChargeAmount;
+	protected @XmlElement String recurringChargeCode;
+	protected @XmlElement float recurringChargeAmount;
+	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+	protected @XmlElement(name = "item") @XmlElementWrapper List<Item> items = new ArrayList<Item>();
+
+    public Plan() {
     }
 
-    public String getId() {
-		return id;
-	}
-
-	public String getCode() {
+    public String getCode() {
 		return code;
 	}
 
-	public String getParentId() {
-		return parentId;
+	public String getId() {
+		return id;
 	}
 
-	public float getAmount() {
-		return amount;
+	public String getName() {
+		return name;
 	}
 
-	public String getMemo() {
-		return memo;
+	public String getDescription() {
+		return description;
 	}
 
-	public String getResponse() {
-		return response;
+	public boolean isActive() {
+		return isActive;
 	}
 
-	public Date getTransactedDatetime() {
-		return transactedDatetime;
+	public int getTrialDays() {
+		return trialDays;
+	}
+
+	public String getBillingFrequency() {
+		return billingFrequency;
+	}
+
+	public String getBillingFrequencyPer() {
+		return billingFrequencyPer;
+	}
+
+	public String getBillingFrequencyUnit() {
+		return billingFrequencyUnit;
+	}
+
+	public int getBillingFrequencyQuantity() {
+		return billingFrequencyQuantity;
+	}
+
+	public String getSetupChargeCode() {
+		return setupChargeCode;
+	}
+
+	public float getSetupChargeAmount() {
+		return setupChargeAmount;
+	}
+
+	public String getRecurringChargeCode() {
+		return recurringChargeCode;
+	}
+
+	public float getRecurringChargeAmount() {
+		return recurringChargeAmount;
 	}
 
 	public Date getCreatedDatetime() {
 		return createdDatetime;
 	}
-	
+
+	public List<Item> getItems() {
+		return items;
+	}
+
 }
