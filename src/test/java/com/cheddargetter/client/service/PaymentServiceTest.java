@@ -17,9 +17,9 @@ public class PaymentServiceTest {
 
     @BeforeTest
     public void setupJaxbContext() throws Exception {
-        service.setUserName("XXX@YYY.ZZZ");
-        service.setPassword("YYY");
-        service.setProductCode("ZZZ");
+        service.setUserName(System.getProperty("username"));
+        service.setPassword(System.getProperty("password"));
+        service.setProductCode(System.getProperty("productcode"));
         service.afterPropertiesSet();
     }
 
