@@ -28,6 +28,23 @@
 
 package com.rusticisoftware.cheddargetter.client;
 
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.InitializingBean;
 import sun.misc.BASE64Encoder;
 
@@ -46,24 +63,26 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 public class CheddarGetterPaymentService implements PaymentService, InitializingBean {
 	private static Logger log = Logger.getLogger(CheddarGetterPaymentService.class.toString());
 	
-	private static String CG_SERVICE_ROOT = "https://cheddargetter.com/xml";
+    public static final HttpHost CG_SERVICE_HOST = new HttpHost("cheddargetter.com", 443, "https");
 
-    private String serviceRoot = CG_SERVICE_ROOT;
+    private HttpHost host = CG_SERVICE_HOST;
 	private String userName;
 	private String password;
 	private String productCode;
 
     private JAXBContext context;
 
-    public String getServiceRoot() {
-        return serviceRoot;
+    private HttpClient httpClient;
+
+    public HttpHost getHost() {
+        return host;
     }
 
-    public void setServiceRoot(String serviceRoot) {
-        this.serviceRoot = serviceRoot;
+    public void setHost(HttpHost host) {
+        this.host = host;
     }
 
-	public String getUserName(){
+    public String getUserName(){
 		return userName;
 	}
 
@@ -96,8 +115,8 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 		setProductCode(productCode);
 	}
 
-    public CheddarGetterPaymentService(String serviceRoot, String userName, String password, String productCode) {
-        setServiceRoot(serviceRoot);
+    public CheddarGetterPaymentService(HttpHost host, String userName, String password, String productCode) {
+        setHost(host);
         setUserName(userName);
         setPassword(password);
         setProductCode(productCode);
@@ -105,6 +124,15 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 
     public void afterPropertiesSet() throws Exception {
         context = newInstance(Customers.class, Plans.class, Error.class);
+
+        ThreadSafeClientConnManager connManager = new ThreadSafeClientConnManager();
+        connManager.setMaxTotal(25);
+        DefaultHttpClient httpClient = new DefaultHttpClient(connManager);
+        httpClient.getCredentialsProvider().setCredentials(
+                new AuthScope(getHost().getHostName(), getHost().getPort()),
+                new UsernamePasswordCredentials(getUserName(), getPassword())
+        );
+        this.httpClient = httpClient;
     }
 
 	public Customer getCustomer(String custCode) throws PaymentException {
@@ -329,9 +357,7 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
     }
 
 	protected <T> T makeServiceCall(Class<T> clazz, String path, Map<String, String> paramMap) throws PaymentException {
-		String fullPath = CG_SERVICE_ROOT + path;
-		String encodedParams = encodeParamMap(paramMap);
-		InputStream responseStream = postTo(fullPath, getUserName(), getPassword(), encodedParams);
+        InputStream responseStream = postTo("/xml" + path, paramMap);
         try {
             Object response = context.createUnmarshaller().unmarshal(responseStream);
             if (response instanceof Error)
@@ -345,67 +371,40 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         }
 	}
 
-	protected InputStream postTo(String urlStr, String userName, String password, String data) throws PaymentException {
+	protected InputStream postTo(String urlStr, Map<String, String> params) throws PaymentException {
+        log.fine("Sending this data to this url: " + urlStr + " data = " + params);
 
-		log.fine("Sending this data to this url: " + urlStr + " data = " + data);
-
-		//Create a new request to send this data...
         try {
-            URL url = new URL(urlStr);
-            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-
-            //Put authentication fields in http header, and make the data the body
-            BASE64Encoder enc = new BASE64Encoder();
-            //connection.setRequestProperty("Content-Type", "text/xml");
-            String auth = userName + ":" + password;
-            connection.setRequestProperty("Authorization", "Basic " + enc.encode(auth.getBytes()));
-
-
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.setUseCaches(false);
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-            PrintWriter output = new PrintWriter(new OutputStreamWriter(connection.getOutputStream()));
-            output.write(data);
-            output.flush();
-            output.close();
-
-            try {
-                return connection.getInputStream();
-            } catch (IOException ioe) {
-                return connection.getErrorStream();
-            }
+            HttpPost post = new HttpPost(urlStr);
+            post.setEntity(createFormEntity(params));
+            return httpClient
+                    .execute(post, createHttpContext())
+                    .getEntity()
+                    .getContent();
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Provided service URL not correct.", e);
         } catch (ProtocolException e) {
             throw new IllegalStateException("POST method not found on protocol.", e);
+        } catch (IllegalStateException e) {
+            throw new PaymentException("Communications link in illegal state while processing request", e);
         } catch (IOException e) {
             throw new PaymentException("Communications exception occurred while processing request", e);
         }
     }
 
-	protected String encodeParamMap(Map<String, String> paramMap) throws PaymentException {
-		if(paramMap == null || paramMap.keySet().size() == 0){
-			return "";
-		}
-		StringBuilder encoded = new StringBuilder();
-		for (String name : paramMap.keySet()){
-			encoded.append(getEncodedParam(name, paramMap.get(name)) + "&");
-		}
-		//Cutoff last ampersand
-		encoded.delete(encoded.length() - 1, encoded.length());
+    protected UrlEncodedFormEntity createFormEntity(Map<String, String> params) throws UnsupportedEncodingException {
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        for (Map.Entry<String, String> entry : params.entrySet())
+            nvps.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+        return new UrlEncodedFormEntity(nvps, HTTP.UTF_8);
+    }
 
-		return encoded.toString();
-	}
-
-	protected String getEncodedParam(String paramName, String paramVal) {
-        try {
-            return URLEncoder.encode(paramName, "UTF-8") + "=" + URLEncoder.encode(paramVal, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("UTF-8 encoding not found.", e);
-        }
+    private BasicHttpContext createHttpContext() {
+        AuthCache authCache = new BasicAuthCache();
+        authCache.put(host, new BasicScheme());
+        BasicHttpContext context = new BasicHttpContext();
+        context.setAttribute(ClientContext.AUTH_CACHE, authCache);
+        return context;
     }
 
 	protected String stripCcNumber(String ccNumber) {
