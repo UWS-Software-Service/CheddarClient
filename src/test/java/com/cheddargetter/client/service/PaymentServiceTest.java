@@ -16,14 +16,14 @@ public class PaymentServiceTest {
     private CheddarGetterPaymentService service = new CheddarGetterPaymentService();
 
     @BeforeTest
-    public void setupJaxbContext() throws Exception {
+    public void setupPaymentService() throws Exception {
         service.setUserName(System.getProperty("username"));
         service.setPassword(System.getProperty("password"));
         service.setProductCode(System.getProperty("productcode"));
         service.afterPropertiesSet();
     }
 
-    @Test
+    @Test(enabled = false)
     public void testCustomerFromXmlJAXB() throws PaymentException {
         List<Customer> customers = service.getAllCustomers();
         assertTrue(customers.size() > 0);

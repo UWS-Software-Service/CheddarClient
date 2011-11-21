@@ -69,7 +69,7 @@ public class XmlMarshallingTest {
         assertEquals(test.getClass(), Error.class);
         Error error = (com.cheddargetter.client.api.Error) test ;
         assertEquals(error.getId(), "73542");
-        assertEquals(error.getCode(), "404");
+        assertEquals(error.getCode(), 404);
         assertEquals(error.getMessage(), "Customer not found");
     }
 

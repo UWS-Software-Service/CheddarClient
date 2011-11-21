@@ -6,9 +6,20 @@
     <groupId>com.rusticsoftware.cheddargetter</groupId>
     <artifactId>client</artifactId>
     <version>0.1-SNAPSHOT</version>
-
     <name>CheddarGetter Client</name>
     <packaging>jar</packaging>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <url>https://github.com/videoview/maven/raw/master/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshot</id>
+            <url>https://github.com/videoview/maven/raw/master/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
