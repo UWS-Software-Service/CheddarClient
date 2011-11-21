@@ -29,20 +29,19 @@
 package com.rusticisoftware.cheddargetter.client;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import sun.misc.BASE64Encoder;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.net.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.rusticisoftware.cheddargetter.client.MapUtils.entry;
+import static com.rusticisoftware.cheddargetter.client.MapUtils.hashMap;
 import static javax.xml.bind.JAXBContext.newInstance;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 public class CheddarGetterPaymentService implements PaymentService, InitializingBean {
 	private static Logger log = Logger.getLogger(CheddarGetterPaymentService.class.toString());
@@ -55,10 +54,6 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 	private String productCode;
 
     private JAXBContext context;
-
-    public void afterPropertiesSet() throws Exception {
-        context = newInstance(Customers.class, Plans.class, Error.class);
-    }
 
     public String getServiceRoot() {
         return serviceRoot;
@@ -108,50 +103,39 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         setProductCode(productCode);
     }
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getCustomer(java.lang.String)
-	 */
+    public void afterPropertiesSet() throws Exception {
+        context = newInstance(Customers.class, Plans.class, Error.class);
+    }
+
 	public Customer getCustomer(String custCode) throws PaymentException {
+        return makeServiceCall(
+                Customer.class,
+                "/customers/get/productCode/" + getProductCode() + "/code/" + custCode
+        );
+	}
+
+	public boolean customerExists(String custCode) throws PaymentException {
 		try {
-			return makeServiceCall("/customers/get/productCode/" + getProductCode() + "/code/" + custCode, null, Customer.class);
-		}
-		catch (PaymentServiceException cge){
-			//If the exception is just that the customer doesn't exist, return null
-			if(cge.getCode() == 404){
-				return null;
-			} else {
-                throw cge ;
+			return getCustomer(custCode) != null;
+		} catch (PaymentServiceException paymentException) {
+            if (paymentException.getCode() == 404) {
+                return false;
+            } else {
+                throw paymentException;
             }
-		}
+        }
 	}
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#customerExists(java.lang.String)
-	 */
-	public boolean customerExists(String custCode) {
-		boolean exists = false;
-		try {
-			Customer cust = getCustomer(custCode);
-			if(cust != null){
-				exists = true;
-			}
-		}
-		catch (Exception e) {}
-		return exists;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getAllCustomers()
-	 */
 	public Customers getAllCustomers() throws PaymentException {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("subscriptionStatus", "activeOnly");
-		return makeServiceCall("/customers/get/productCode/" + getProductCode(), params, Customers.class);
+		return makeServiceCall(
+                Customers.class,
+                "/customers/get/productCode/" + getProductCode(),
+                hashMap(
+                        entry("subscriptionStatus", "activeOnly")
+                )
+        );
 	}
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#createNewCustomer(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-	 */
 	public Customer createNewCustomer(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
 			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear,
@@ -162,12 +146,10 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 		paramMap.put("firstName", firstName);
 		paramMap.put("lastName", lastName);
 		paramMap.put("email", email);
-		if(company != null){
+		if(company != null)
 			paramMap.put("company", company);
-		}
 
 		paramMap.put("subscription[planCode]", subscriptionPlanCode);
-
 		//If plan is free, no cc information needed, so we just check
 		//ccNumber field and assume the rest are there or not
 		if(ccNumber != null){
@@ -175,16 +157,19 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 			paramMap.put("subscription[ccLastName]", ccLastName);
 			paramMap.put("subscription[ccNumber]", stripCcNumber(ccNumber));
 			paramMap.put("subscription[ccExpiration]", ccExpireMonth + "/" + ccExpireYear);
-			if(ccCardCode != null){
+			if(ccCardCode != null)
 				paramMap.put("subscription[ccCardCode]", ccCardCode);
-			}
-			if(ccZip != null){
+			if(ccZip != null)
 				paramMap.put("subscription[ccZip]", ccZip);
-			}
 		}
 
-		Customers customers = makeServiceCall("/customers/new/productCode/" + getProductCode(), paramMap, Customers.class);
-		return customers.getCustomers().get(0);
+        return firstCustomer(
+                makeServiceCall(
+                        Customers.class,
+                        "/customers/new/productCode/" + getProductCode(),
+                        paramMap
+                )
+        );
 	}
 
 	public Customer updateCustomerAndSubscription(String custCode, String firstName, String lastName,
@@ -217,11 +202,16 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 			}
 		}
 
-		Customers customers = makeServiceCall("/customers/edit/productCode/" + getProductCode() + "/code/" + custCode, paramMap, Customers.class);
-		return customers.getCustomers().get(0);
+        return firstCustomer(
+                makeServiceCall(
+                        Customers.class,
+                        "/customers/edit/productCode/" + getProductCode() + "/code/" + custCode,
+                        paramMap
+                )
+        );
 	}
 
-	public Customer updateCustomer(String custCode, String firstName, String lastName,
+    public Customer updateCustomer(String custCode, String firstName, String lastName,
 			String email, String company) throws PaymentException {
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("firstName", firstName);
@@ -230,13 +220,15 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 		if(company != null){
 			paramMap.put("company", company);
 		}
-		Customers customers = makeServiceCall("/customers/edit-customer/productCode/" + getProductCode() + "/code/" + custCode, paramMap, Customers.class);
-		return customers.getCustomers().get(0);
+        return firstCustomer(
+                makeServiceCall(
+                        Customers.class,
+                        "/customers/edit-customer/productCode/" + getProductCode() + "/code/" + custCode,
+                        paramMap
+                )
+        );
 	}
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#updateSubscription(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-	 */
 	public Customer updateSubscription(String customerCode, String planCode, String ccFirstName, String ccLastName,
                                        String ccNumber, String ccExpireMonth, String ccExpireYear, String ccCardCode, String ccZip) throws PaymentException {
 
@@ -258,98 +250,85 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 			}
 		}
 
-		String relativeUrl = "/customers/edit-subscription/productCode/" + getProductCode() + "/code/" + customerCode;
-		return makeServiceCall(relativeUrl, paramMap, Customer.class);
+        return makeServiceCall(
+                Customer.class,
+                "/customers/edit-subscription/productCode/" + getProductCode() + "/code/" + customerCode,
+                paramMap
+        );
 	}
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#cancelSubscription(java.lang.String)
-	 */
 	public Customer cancelSubscription(String customerCode) throws PaymentException {
-		return makeServiceCall("/customers/cancel/productCode/" + getProductCode() + "/code/" + customerCode, null, Customer.class);
+		return makeServiceCall(
+                Customer.class,
+                "/customers/cancel/productCode/" + getProductCode() + "/code/" + customerCode
+        );
 	}
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#addItemQuantity(java.lang.String, java.lang.String)
-	 */
 	public Customer addItemQuantity(String customerCode, String itemCode) throws PaymentException {
 	    return addItemQuantity(customerCode, itemCode, 1);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#addItemQuantity(java.lang.String, java.lang.String, int)
-	 */
 	public Customer addItemQuantity(String customerCode, String itemCode, int quantity) throws PaymentException {
-	    HashMap<String, String> paramMap = new HashMap<String, String>();
-	    paramMap.put("quantity", String.valueOf(quantity));
-
-	    String relativeUrl = "/customers/add-item-quantity/productCode/" + getProductCode() +
-	                         "/code/" + customerCode + "/itemCode/" + itemCode;
-	    return makeServiceCall(relativeUrl, paramMap, Customer.class);
+        return makeServiceCall(
+                Customer.class,
+                "/customers/add-item-quantity/productCode/" + getProductCode() + "/code/" + customerCode + "/itemCode/" + itemCode,
+                hashMap(
+                        entry("quantity", String.valueOf(quantity))
+                )
+        );
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getLatestCreditCardData(java.lang.String)
-	 */
 	public CreditCardData getLatestCreditCardData(String customerCode) throws PaymentException {
-		Customer customer;
-		try { customer = getCustomer(customerCode); }
-		catch (Exception e) { return null; }
-
-		List<Subscription> subs = customer.getSubscriptions();
-		if(subs == null || subs.size() == 0){
-			return null;
-		}
-
-		Subscription sub = subs.get(0);
-		if(sub.getCcExpirationDate() == null){
-			return null;
-		}
-
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		cal.setTime(sub.getCcExpirationDate());
-		return new CreditCardData(sub.getCcFirstName(), sub.getCcLastName(),
-				sub.getCcType(), sub.getCcLastFour(),
-				cal.get(Calendar.MONTH), cal.get(Calendar.YEAR));
+		Customer customer = getCustomer(customerCode);
+        for (Subscription sub : customer.getSubscriptions())
+            if(sub.getCcExpirationDate() != null)
+                return getCreditCardFromSubscription(sub);
+        return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#isLatestSubscriptionCanceled(java.lang.String)
-	 */
-	public boolean isLatestSubscriptionCanceled(String customerCode) throws PaymentException {
-		Customer customer;
-		try { customer = getCustomer(customerCode); }
-		catch (Exception e) { return false; }
+    public boolean isLatestSubscriptionCanceled(String customerCode) throws PaymentException {
+        Customer customer = getCustomer(customerCode);
+        Subscription subscription = getFirstSubscription(customer);
+        return subscription != null && subscription.getCanceledDatetime() != null;
+    }
 
-		List<Subscription> subs = customer.getSubscriptions();
-		if(subs == null || subs.size() == 0){
-			return false;
-		}
+    public int getCurrentItemUsage(String customerCode, String itemCode) throws PaymentException{
+        Customer customer = getCustomer(customerCode);
+        Subscription subscription = getFirstSubscription(customer);
+        if (subscription != null)
+            for(Item item : subscription.getItems())
+                if(item.getCode().equals(itemCode))
+                    return item.getQuantity();
+        throw new PaymentException("Couldn't find item with code " + itemCode);
+    }
 
-		Subscription sub = subs.get(0);
-		if(sub.getCanceledDatetime() == null){
-			return false;
-		}
+    protected CreditCardData getCreditCardFromSubscription(Subscription sub) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.setTime(sub.getCcExpirationDate());
+        return new CreditCardData(
+                sub.getCcFirstName(), sub.getCcLastName(),
+                sub.getCcType(), sub.getCcLastFour(),
+                cal.get(Calendar.MONTH), cal.get(Calendar.YEAR)
+        );
+    }
 
-		return true;
-	}
+    protected Customer firstCustomer(Customers customers) {
+        if (customers == null || isEmpty(customers.getCustomers()))
+            return null;
+        return customers.getCustomers().get(0);
+    }
 
-	/* (non-Javadoc)
-	 * @see com.rusticisoftware.cheddargetter.client.PaymentService#getCurrentItemUsage(java.lang.String, java.lang.String)
-	 */
-	public int getCurrentItemUsage(String customerCode, String itemCode) throws PaymentException{
-	    Customer cust = getCustomer(customerCode);
-	    List<Item> currentItems = cust.getSubscriptions().get(0).getItems();
-	    for(Item item : currentItems){
-	        if(item.getCode().equals(itemCode)){
-	            return item.getQuantity();
-	        }
-	    }
-	    throw new PaymentException("Couldn't find item with code " + itemCode);
-	}
+    protected Subscription getFirstSubscription(Customer customer) {
+        List<Subscription> subs = customer.getSubscriptions();
+        return isEmpty(subs) ? null : subs.get(0);
+    }
 
-	public <T> T makeServiceCall(String path, Map<String, String> paramMap, Class<T> clazz) throws PaymentException {
+    protected <T> T makeServiceCall(Class<T> clazz, String path) throws PaymentException {
+        return makeServiceCall(clazz, path, null);
+    }
+
+	protected <T> T makeServiceCall(Class<T> clazz, String path, Map<String, String> paramMap) throws PaymentException {
 		String fullPath = CG_SERVICE_ROOT + path;
 		String encodedParams = encodeParamMap(paramMap);
 		InputStream responseStream = postTo(fullPath, getUserName(), getPassword(), encodedParams);
@@ -429,7 +408,7 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         }
     }
 
-	private static String stripCcNumber(String ccNumber) {
+	protected String stripCcNumber(String ccNumber) {
 		return (ccNumber == null) ? null : ccNumber.replace(" ", "").replace("-", "");
 	}
 }

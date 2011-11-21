@@ -36,7 +36,7 @@ public interface PaymentService {
 
 	Customer getCustomer(String custCode) throws Exception;
 
-	boolean customerExists(String custCode);
+	boolean customerExists(String custCode) throws PaymentException;
 
 	Customers getAllCustomers() throws Exception;
 

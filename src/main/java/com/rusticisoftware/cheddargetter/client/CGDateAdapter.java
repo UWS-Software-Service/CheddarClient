@@ -19,7 +19,7 @@ public class CGDateAdapter extends XmlAdapter<String, Date> {
 
     public String marshal(Date val) throws Exception {
         String date = createFormatter().format(val);
-        return date;
+        return unfixDateFormat(date);
     }
 
     protected SimpleDateFormat createFormatter() {
@@ -35,5 +35,16 @@ public class CGDateAdapter extends XmlAdapter<String, Date> {
         String tz = cgDate.substring(tzIndex, cgDate.length());
         String modifiedTz = tz.replace(":", "");
         return cgDate.substring(0, tzIndex) + modifiedTz;
+    }
+
+    public static String unfixDateFormat(String cgDate) {
+        //CG's dates have annoying ':' symbol in middle of timezone part
+        //So here we take it out
+        int tzIndex = cgDate.lastIndexOf("+");
+        if (tzIndex > 0) {
+            return cgDate.substring(0, tzIndex + 3) +":" + cgDate.substring(tzIndex + 3, cgDate.length());
+        } else {
+            return cgDate;
+        }
     }
 }

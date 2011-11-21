@@ -48,9 +48,9 @@ public class Subscription {
 	protected @XmlElement String ccLastName;
 	protected @XmlElement String ccType;
 	protected @XmlElement String ccLastFour;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date ccExpirationDate;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date canceledDatetime;
-	protected @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
+	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date ccExpirationDate;
+	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date canceledDatetime;
+	protected @XmlElement @XmlJavaTypeAdapter(CGDateAdapter.class) Date createdDatetime;
 
 
 	protected @XmlElement(name = "plan") @XmlElementWrapper List<Plan> plans = new ArrayList<Plan>();
