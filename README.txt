@@ -26,5 +26,4 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Compile using "ant clean compile"
-Create a deployable jar using "ant clean package"
+The project is a Maven project which can be compiled using "mvn clean install" and depends on Spring, HttpCient 4 and JAXB.
