@@ -20,6 +20,38 @@
         </snapshotRepository>
     </distributionManagement>
 
+    <build>
+	    <plugins>
+    		<plugin> 
+		        <groupId>org.codehaus.mojo</groupId> 
+		        <artifactId>jaxb2-maven-plugin</artifactId> 
+		        <version>1.3</version> 
+		        <executions> 
+		            <execution> 
+		                <goals> 
+		                    <goal>schemagen</goal> 
+		                </goals> 
+		            </execution> 
+		        </executions> 
+		        <configuration> 
+		            <includes> 
+		                <include>**/client/api/Charge.java</include> 
+		                <include>**/client/api/Customers.java</include> 
+		                <include>**/client/api/Customer.java</include> 
+		                <include>**/client/api/Error.java</include> 
+		                <include>**/client/api/Invoice.java</include> 
+		                <include>**/client/api/Item.java</include> 
+		                <include>**/client/api/Plan.java</include> 
+		                <include>**/client/api/Plans.java</include> 
+		                <include>**/client/api/Subscription.java</include> 
+		                <include>**/client/api/Transaction.java</include> 
+		                <include>**/client/service/CGDateAdapter.java</include> 
+		            </includes> 
+		        </configuration> 
+		    </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
