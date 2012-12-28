@@ -62,7 +62,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 public class CheddarGetterPaymentService implements PaymentService, InitializingBean {
 	private static Logger log = Logger.getLogger(CheddarGetterPaymentService.class.toString());
-	
+
     public static final HttpHost CG_SERVICE_HOST = new HttpHost("cheddargetter.com", 443, "https");
 
     private HttpHost host = CG_SERVICE_HOST;
@@ -105,7 +105,7 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 	public void setProductCode(String productCode){
 		this.productCode = productCode;
 	}
-	
+
 	public CheddarGetterPaymentService(){
 	}
 
@@ -340,6 +340,30 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
                 cal.get(Calendar.MONTH), cal.get(Calendar.YEAR)
         );
     }
+
+	public Customer addCustomCharge(String customerCode, String chargeCode, Integer quantity, Double eachAmount, String description,
+	                              String invoicePeriod, String remoteAddress) throws PaymentException {
+
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("chargeCode", chargeCode);
+		paramMap.put("quantity", quantity.toString());
+		paramMap.put("eachAmount", eachAmount.toString());
+		if (description != null) {
+			paramMap.put("description", description);
+		}
+		if (invoicePeriod != null) {
+			paramMap.put("invoicePeriod", invoicePeriod);
+		}
+		if (remoteAddress != null) {
+			paramMap.put("remoteAddress", remoteAddress);
+		}
+
+		return firstCustomer(makeServiceCall(
+			Customers.class,
+			"/customers/add-charge/productCode/" + getProductCode() + "/code/" + customerCode,
+			paramMap
+		));
+	}
 
     protected Customer firstCustomer(Customers customers) {
         if (customers == null || isEmpty(customers.getCustomers()))

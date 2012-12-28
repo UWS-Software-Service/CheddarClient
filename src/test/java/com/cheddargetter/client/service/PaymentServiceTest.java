@@ -1,14 +1,11 @@
 package com.cheddargetter.client.service;
 
-import com.cheddargetter.client.api.Customer;
-import com.cheddargetter.client.api.PaymentException;
-import com.cheddargetter.client.service.CheddarGetterPaymentService;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import com.cheddargetter.client.api.*;
+import org.testng.annotations.*;
 
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertTrue;
 
 @Test(enabled = false)
 public class PaymentServiceTest {
@@ -28,5 +25,17 @@ public class PaymentServiceTest {
         List<Customer> customers = service.getAllCustomers();
         assertTrue(customers.size() > 0);
     }
+
+	@Test(enabled = false)
+	public void testAddCustomCharge() throws Exception {
+		Customer customer =
+				service.addCustomCharge(System.getProperty("customercode"), "CHARGE_CODE", 1, 25.43, "description", null, null);
+		List<Charge> charges = customer.getSubscriptions().get(0).getInvoices().get(0).getCharges();
+		Charge lastCharge = charges.get(charges.size() - 1);
+
+		assertTrue("CHARGE_CODE".equals(lastCharge.getCode()));
+		assertTrue(lastCharge.getQuantity() == 1);
+		assertTrue("description".equals(lastCharge.getDescription()));
+	}
 
 }
