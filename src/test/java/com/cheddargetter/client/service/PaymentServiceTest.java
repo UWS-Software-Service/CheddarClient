@@ -5,6 +5,7 @@ import org.testng.annotations.*;
 
 import java.util.List;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 @Test(enabled = false)
@@ -38,4 +39,13 @@ public class PaymentServiceTest {
 		assertTrue("description".equals(lastCharge.getDescription()));
 	}
 
+	@Test(enabled = false)
+	public void testGetCustomer() throws Exception {
+		int previousUsage = service.getCurrentItemUsage(System.getProperty("customercode"), System.getProperty("itemcode"));
+
+		service.addItemQuantity(System.getProperty("customercode"), System.getProperty("itemcode"), 200);
+
+		int currentItemUsage = service.getCurrentItemUsage(System.getProperty("customercode"), System.getProperty("itemcode"));
+		assertEquals(currentItemUsage, previousUsage + 200);
+	}
 }

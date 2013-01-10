@@ -136,10 +136,10 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
     }
 
 	public Customer getCustomer(String custCode) throws PaymentException {
-        return makeServiceCall(
-                Customer.class,
+        return firstCustomer(makeServiceCall(
+                Customers.class,
                 "/customers/get/productCode/" + getProductCode() + "/code/" + custCode
-        );
+        ));
 	}
 
 	public boolean customerExists(String custCode) throws PaymentException {
@@ -297,14 +297,13 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 	}
 
 	public Customer addItemQuantity(String customerCode, String itemCode, int quantity) throws PaymentException {
-        return makeServiceCall(
-                Customer.class,
-                "/customers/add-item-quantity/productCode/" + getProductCode() + "/code/" + customerCode + "/itemCode/" + itemCode,
-                hashMap(
-                        entry("quantity", String.valueOf(quantity))
-                )
-        );
-
+        return firstCustomer(makeServiceCall(
+            Customers.class,
+            "/customers/add-item-quantity/productCode/" + getProductCode() + "/code/" + customerCode + "/itemCode/" + itemCode,
+            hashMap(
+                    entry("quantity", String.valueOf(quantity))
+            )
+        ));
 	}
 
 	public CreditCardData getLatestCreditCardData(String customerCode) throws PaymentException {
@@ -377,7 +376,7 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
     }
 
     protected <T> T makeServiceCall(Class<T> clazz, String path) throws PaymentException {
-        return makeServiceCall(clazz, path, null);
+        return makeServiceCall(clazz, path, new HashMap<String, String>());
     }
 
 	protected <T> T makeServiceCall(Class<T> clazz, String path, Map<String, String> paramMap) throws PaymentException {
