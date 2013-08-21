@@ -6,6 +6,7 @@ import org.testng.annotations.*;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 @Test(enabled = false)
@@ -48,4 +49,11 @@ public class PaymentServiceTest {
 		int currentItemUsage = service.getCurrentItemUsage(System.getProperty("customercode"), System.getProperty("itemcode"));
 		assertEquals(currentItemUsage, previousUsage + 200);
 	}
+
+    @Test(enabled = false)
+    public void testGetAllPricingPlans() throws PaymentException {
+        Plans plans = service.getAllPricingPlans();
+        assertNotNull(plans);
+        assertTrue(plans.getPlans().size() > 0);
+    }
 }

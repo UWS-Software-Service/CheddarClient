@@ -364,6 +364,13 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 		));
 	}
 
+    public Plans getAllPricingPlans() throws PaymentException {
+        return makeServiceCall(
+            Plans.class,
+            "/plans/get/productCode/" + getProductCode()
+        );
+    }
+
     protected Customer firstCustomer(Customers customers) {
         if (customers == null || isEmpty(customers.getCustomers()))
             return null;
