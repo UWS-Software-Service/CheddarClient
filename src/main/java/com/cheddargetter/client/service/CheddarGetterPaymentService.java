@@ -30,7 +30,6 @@ package com.cheddargetter.client.service;
 
 import com.cheddargetter.client.api.*;
 import com.cheddargetter.client.api.Error;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -53,7 +52,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -128,7 +126,7 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
     }
 
     public void afterPropertiesSet() throws Exception {
-        context = newInstance(Customers.class, Plans.class, Error.class);
+        context = newInstance(Customers.class, Plans.class, Error.class, Success.class);
 
         ThreadSafeClientConnManager connManager = new ThreadSafeClientConnManager();
         connManager.setMaxTotal(25);
@@ -274,7 +272,10 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
 
     @Override
     public void deleteCustomer(String code) throws PaymentException {
-        makeServiceCall("/customers/delete/productCode/" + getProductCode() + "/code/" + code);
+        makeServiceCall(
+                Success.class,
+                "/customers/delete/productCode/" + getProductCode() + "/code/" + code
+        );
     }
 
     public Customer updateSubscription(String customerCode, String planCode, String ccFirstName, String ccLastName,
@@ -400,20 +401,6 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
     protected Subscription getFirstSubscription(Customer customer) {
         List<Subscription> subs = customer.getSubscriptions();
         return isEmpty(subs) ? null : subs.get(0);
-    }
-
-    protected void makeServiceCall(String path) throws PaymentException {
-        try {
-            InputStream inputStream = postTo("/xml" + path, new HashMap<String, String>());
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(inputStream, writer);
-            String response = writer.toString();
-            if(!response.contains("<success/>")) {
-                throw new PaymentException(response);
-            }
-        } catch (IOException e) {
-            throw new PaymentException("Reading problem", e);
-        }
     }
 
     protected <T> T makeServiceCall(Class<T> clazz, String path) throws PaymentException {

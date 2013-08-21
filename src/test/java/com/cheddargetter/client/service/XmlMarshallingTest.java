@@ -24,12 +24,13 @@ public class XmlMarshallingTest {
     public static final String CUSTOMER_XML = "/customer.xml";
     public static final String PLANS_XML = "/plans.xml";
     public static final String ERROR_XML = "/error.xml";
+    public static final String SUCCESS_XML = "/success.xml";
 
     private JAXBContext context;
 
     @BeforeTest
     public void setupJaxbContext() throws JAXBException {
-        context = newInstance(Customers.class, Plans.class, Error.class);
+        context = newInstance(Customers.class, Plans.class, Error.class, Success.class);
     }
 
     @Test
@@ -71,6 +72,13 @@ public class XmlMarshallingTest {
         assertEquals(error.getId(), "73542");
         assertEquals(error.getCode(), 404);
         assertEquals(error.getMessage(), "Customer not found");
+    }
+
+    @Test
+    public void testSuccessFromXmlJAXB() throws JAXBException {
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+        Object test = unmarshaller.unmarshal(stream(SUCCESS_XML));
+        assertEquals(test.getClass(), Success.class);
     }
 
     private static String streamString(String fileName) {
