@@ -1,13 +1,16 @@
 package com.cheddargetter.client.service;
 
-import com.cheddargetter.client.api.*;
-import org.testng.annotations.*;
+import com.cheddargetter.client.api.Charge;
+import com.cheddargetter.client.api.Customer;
+import com.cheddargetter.client.api.PaymentException;
+import com.cheddargetter.client.api.Plans;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 @Test(enabled = false)
 public class PaymentServiceTest {
@@ -55,5 +58,34 @@ public class PaymentServiceTest {
         Plans plans = service.getAllPricingPlans();
         assertNotNull(plans);
         assertTrue(plans.getPlans().size() > 0);
+    }
+
+    @Test(enabled = false, expectedExceptions = PaymentException.class)
+    public void deleteCustomerThatNotExistShouldThrowPaymentException() throws PaymentException {
+        service.deleteCustomer("this_sutomer_for_sure_not_exists_on_CG");
+    }
+
+    @Test(enabled = false)
+    public void createValidCustomer() throws PaymentException {
+        String code = "CG_TEST_CUSTOMER_CODE";
+        HashMap<String, String> args = new HashMap<String, String>();
+        args.put("code", code);
+        args.put("firstName", "Test First Name");
+        args.put("lastName", "Test Last Name");
+        args.put("email", "proper@email.com");
+        args.put("subscription[planCode]", "TEST_TOP_RIGHT_10K");
+        args.put("subscription[ccFirstName]", "CC First Name");
+        args.put("subscription[ccLastName]", "CC Last Name");
+        args.put("subscription[ccNumber]", "468474");
+        args.put("subscription[ccExpireMonth]", "14");
+        args.put("subscription[ccExpireYear]", "3472");
+        args.put("subscription[ccCardCode]", "CASZ");
+        args.put("subscription[ccZip]", "892314");
+        args.put("subscription[returnUrl]", "http://topright.com");
+        args.put("subscription[cancelUrl]", "http://topright.com");
+        assertNotNull(service.createNewCustomer(args));
+        assertNotNull(service.getCustomer(code));
+        // cleanup
+        service.deleteCustomer(code);
     }
 }

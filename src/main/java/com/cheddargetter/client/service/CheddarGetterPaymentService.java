@@ -30,6 +30,7 @@ package com.cheddargetter.client.service;
 
 import com.cheddargetter.client.api.*;
 import com.cheddargetter.client.api.Error;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -50,8 +51,12 @@ import org.springframework.beans.factory.InitializingBean;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -200,6 +205,16 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         );
 	}
 
+    public Customer createNewCustomer(Map<String, String> params) throws PaymentException {
+        return firstCustomer(
+                makeServiceCall(
+                        Customers.class,
+                        "/customers/new/productCode/" + getProductCode(),
+                        params
+                )
+        );
+    }
+
 	public Customer updateCustomerAndSubscription(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
 			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear,
@@ -257,7 +272,12 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         );
 	}
 
-	public Customer updateSubscription(String customerCode, String planCode, String ccFirstName, String ccLastName,
+    @Override
+    public void deleteCustomer(String code) throws PaymentException {
+        makeServiceCall("/customers/delete/productCode/" + getProductCode() + "/code/" + code);
+    }
+
+    public Customer updateSubscription(String customerCode, String planCode, String ccFirstName, String ccLastName,
                                        String ccNumber, String ccExpireMonth, String ccExpireYear, String ccCardCode, String ccZip) throws PaymentException {
 
 		HashMap<String, String> paramMap = new HashMap<String, String>();
@@ -382,6 +402,20 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         return isEmpty(subs) ? null : subs.get(0);
     }
 
+    protected void makeServiceCall(String path) throws PaymentException {
+        try {
+            InputStream inputStream = postTo("/xml" + path, new HashMap<String, String>());
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(inputStream, writer);
+            String response = writer.toString();
+            if(!response.contains("<success/>")) {
+                throw new PaymentException(response);
+            }
+        } catch (IOException e) {
+            throw new PaymentException("Reading problem", e);
+        }
+    }
+
     protected <T> T makeServiceCall(Class<T> clazz, String path) throws PaymentException {
         return makeServiceCall(clazz, path, new HashMap<String, String>());
     }
@@ -399,7 +433,7 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         } catch (JAXBException e) {
             throw new PaymentException("Unable to create XML response unmarshaller", e);
         }
-	}
+    }
 
 	protected InputStream postTo(String urlStr, Map<String, String> params) throws PaymentException {
         log.fine("Sending this data to this url: " + urlStr + " data = " + params);

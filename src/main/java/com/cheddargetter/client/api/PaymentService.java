@@ -29,6 +29,7 @@
 package com.cheddargetter.client.api;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PaymentService {
 
@@ -43,16 +44,20 @@ public interface PaymentService {
 			String subscriptionPlanCode, String ccFirstName, String ccLastName,
 			String ccNumber, String ccExpireMonth, String ccExpireYear,
 			String ccCardCode, String ccZip) throws Exception;
-	
+
+    public Customer createNewCustomer(Map<String, String> params) throws PaymentException;
+
 	public Customer updateCustomerAndSubscription(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
 			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear, 
 			String ccCardCode, String ccZip) throws Exception;
-	
-	public Customer updateCustomer(String custCode, String firstName, String lastName,
+
+    public Customer updateCustomer(String custCode, String firstName, String lastName,
 			String email, String company) throws Exception;
 
-	Customer updateSubscription(String customerCode,
+    void deleteCustomer(String code) throws PaymentException;
+
+    Customer updateSubscription(String customerCode,
                                 String planCode, String ccFirstName, String ccLastName,
                                 String ccNumber, String ccExpireMonth, String ccExpireYear,
                                 String ccCardCode, String ccZip) throws Exception;
