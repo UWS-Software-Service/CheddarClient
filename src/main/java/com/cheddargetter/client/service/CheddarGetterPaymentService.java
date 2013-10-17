@@ -167,6 +167,13 @@ public class CheddarGetterPaymentService implements PaymentService, Initializing
         ).getCustomers();
 	}
 
+    public List<Customer> getAllCustomersIncludingCancelled() throws PaymentException {
+        return makeServiceCall(
+                Customers.class,
+                "/customers/get/productCode/" + getProductCode()
+        ).getCustomers();
+    }
+
 	public Customer createNewCustomer(String custCode, String firstName, String lastName,
 			String email, String company, String subscriptionPlanCode, String ccFirstName,
 			String ccLastName, String ccNumber, String ccExpireMonth, String ccExpireYear,

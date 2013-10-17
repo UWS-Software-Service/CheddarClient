@@ -31,6 +31,13 @@ public class PaymentServiceTest {
         assertTrue(customers.size() > 0);
     }
 
+    @Test(enabled = false)
+    public void testGetAllCustomersIncludingDeleted() throws PaymentException {
+        List<Customer> customers = service.getAllCustomers();
+        List<Customer> customersIncludingDeletedOnes = service.getAllCustomersIncludingCancelled();
+        assertTrue(customers.size() < customersIncludingDeletedOnes.size());
+    }
+
 	@Test(enabled = false)
 	public void testAddCustomCharge() throws Exception {
 		Customer customer =
